@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Sidebar from './Sidebar'
 import Header from './Header'
@@ -12,6 +13,7 @@ import AIGenerationPanel from '../panels/AIGenerationPanel'
 import FilterPanel from '../panels/FilterPanel'
 
 export default function AppLayout() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const { 
     activeTab, 
     viewMode, 
@@ -36,7 +38,10 @@ export default function AppLayout() {
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar 
+        isCollapsed={sidebarCollapsed} 
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} 
+      />
       
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">

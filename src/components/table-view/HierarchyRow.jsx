@@ -132,15 +132,16 @@ export default function HierarchyRow({
           />
         )}
         
-        <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${typeInfo.color} flex-shrink-0 relative`}>
+        <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${typeInfo.color} flex-shrink-0`}>
           {typeInfo.label}
-          {/* Child count badge */}
-          {(item.type === 'objective' || item.type === 'tactic' || item.type === 'bestPractice') && item.childIds?.length > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 flex items-center justify-center text-[10px] font-bold bg-slate-700 text-white rounded-full">
-              {item.childIds.length}
-            </span>
-          )}
         </span>
+        
+        {/* Child count - subtle, after badge */}
+        {(item.type === 'objective' || item.type === 'tactic' || item.type === 'bestPractice') && item.childIds?.length > 0 && (
+          <span className="text-[10px] text-slate-400 font-normal">
+            ({item.childIds.length})
+          </span>
+        )}
         
         {isEditing ? (
           <InlineEditor

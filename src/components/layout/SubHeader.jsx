@@ -6,11 +6,13 @@ import {
   Plus,
   Layers,
   BarChart3,
-  Share2
+  Share2,
+  Sparkles
 } from 'lucide-react'
 import { useFuel } from '../../context/FuelContext'
 import CreateObjectiveModal from '../panels/CreateObjectiveModal'
 import CreateTacticModal from '../panels/CreateTacticModal'
+import ContentWizard from '../wizard/ContentWizard'
 
 const tabs = [
   { id: 'content', label: 'Content', icon: Layers },
@@ -30,6 +32,7 @@ export default function SubHeader() {
   
   const [showCreateObjective, setShowCreateObjective] = useState(false)
   const [showCreateTactic, setShowCreateTactic] = useState(false)
+  const [showWizard, setShowWizard] = useState(false)
   
   return (
     <div className="h-12 bg-white border-b border-slate-200 flex items-center justify-between px-4">
@@ -104,14 +107,21 @@ export default function SubHeader() {
             className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors"
           >
             <Plus className="w-4 h-4" />
-            <span>Create Tactic</span>
+            <span className="hidden lg:inline">Create Tactic</span>
           </button>
           <button 
             onClick={() => setShowCreateObjective(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors"
           >
             <Plus className="w-4 h-4" />
-            <span>Create Objective</span>
+            <span className="hidden lg:inline">Create Objective</span>
+          </button>
+          <button 
+            onClick={() => setShowWizard(true)}
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg text-sm font-medium hover:from-teal-600 hover:to-cyan-600 transition-all shadow-sm"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>AI Wizard</span>
           </button>
         </div>
       </div>
@@ -124,6 +134,10 @@ export default function SubHeader() {
       <CreateTacticModal 
         isOpen={showCreateTactic} 
         onClose={() => setShowCreateTactic(false)} 
+      />
+      <ContentWizard 
+        isOpen={showWizard} 
+        onClose={() => setShowWizard(false)} 
       />
     </div>
   )
