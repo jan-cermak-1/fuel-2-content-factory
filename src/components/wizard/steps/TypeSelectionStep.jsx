@@ -6,9 +6,11 @@ const types = [
     id: 'objective',
     label: 'Objective',
     icon: Target,
-    color: 'violet',
     gradient: 'from-violet-500 to-purple-600',
     bgLight: 'bg-violet-50',
+    ringClass: 'ring-2 ring-violet-500',
+    dotClass: 'bg-violet-400',
+    hintActiveClass: 'text-violet-600',
     description: 'High-level goal with metrics and deadline',
     examples: ['Increase brand awareness by 25%', 'Acquire 1000 new leads', 'Improve engagement rate'],
     hint: 'Objectives define WHAT we want to achieve',
@@ -17,9 +19,11 @@ const types = [
     id: 'tactic',
     label: 'Tactic',
     icon: Layers,
-    color: 'blue',
     gradient: 'from-blue-500 to-indigo-600',
     bgLight: 'bg-blue-50',
+    ringClass: 'ring-2 ring-blue-500',
+    dotClass: 'bg-blue-400',
+    hintActiveClass: 'text-blue-600',
     description: 'Strategy and approach to reach the goal',
     examples: ['Influencer marketing campaign', 'Content calendar strategy', 'Paid social campaigns'],
     hint: 'Tactics define HOW we achieve the objective',
@@ -28,9 +32,11 @@ const types = [
     id: 'bestPractice',
     label: 'Best Practice',
     icon: BookOpen,
-    color: 'emerald',
     gradient: 'from-emerald-500 to-teal-600',
     bgLight: 'bg-emerald-50',
+    ringClass: 'ring-2 ring-emerald-500',
+    dotClass: 'bg-emerald-400',
+    hintActiveClass: 'text-emerald-600',
     description: 'Recommended procedure or proven practice',
     examples: ['Micro-influencer outreach', 'A/B testing framework', 'Content pillar strategy'],
     hint: 'Best practices are specific guides within a tactic',
@@ -39,9 +45,11 @@ const types = [
     id: 'step',
     label: 'Step',
     icon: ListChecks,
-    color: 'slate',
     gradient: 'from-slate-500 to-slate-700',
     bgLight: 'bg-slate-100',
+    ringClass: 'ring-2 ring-slate-500',
+    dotClass: 'bg-slate-400',
+    hintActiveClass: 'text-slate-600',
     description: 'Individual action or task to perform',
     examples: ['Set up UTM parameters', 'Check engagement metrics', 'Launch automation'],
     hint: 'Steps are specific TODO items',
@@ -74,7 +82,7 @@ export default function TypeSelectionStep({ data, updateData }) {
               onClick={() => updateData({ type: type.id })}
               className={`relative p-6 rounded-2xl text-left transition-all group
                 ${isSelected 
-                  ? `ring-2 ring-${type.color}-500 ${type.bgLight}` 
+                  ? `${type.ringClass} ${type.bgLight}` 
                   : 'bg-white border border-slate-200 hover:border-slate-300 hover:shadow-lg'
                 }
               `}
@@ -83,7 +91,7 @@ export default function TypeSelectionStep({ data, updateData }) {
               {isSelected && (
                 <motion.div
                   layoutId="selectedType"
-                  className={`absolute inset-0 rounded-2xl ring-2 ring-${type.color}-500 ${type.bgLight}`}
+                  className={`absolute inset-0 rounded-2xl ${type.ringClass} ${type.bgLight}`}
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
@@ -106,14 +114,14 @@ export default function TypeSelectionStep({ data, updateData }) {
                 <div className="space-y-1">
                   {type.examples.map((example, i) => (
                     <p key={i} className="text-xs text-slate-500 flex items-center gap-2">
-                      <span className={`w-1 h-1 rounded-full bg-${type.color}-400`} />
+                      <span className={`w-1 h-1 rounded-full ${type.dotClass}`} />
                       {example}
                     </p>
                   ))}
                 </div>
                 
                 {/* Hint */}
-                <p className={`mt-4 text-xs font-medium ${isSelected ? `text-${type.color}-600` : 'text-slate-400'}`}>
+                <p className={`mt-4 text-xs font-medium ${isSelected ? type.hintActiveClass : 'text-slate-400'}`}>
                   {type.hint}
                 </p>
               </div>

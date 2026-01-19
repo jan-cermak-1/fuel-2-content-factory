@@ -6,7 +6,6 @@ import {
   Globe2, 
   Users,
   Check,
-  X,
   ChevronDown,
   ChevronRight,
   Copy,
@@ -68,7 +67,21 @@ const variantTypes = [
     icon: Building2,
     description: 'Customize content for different industries',
     options: industries,
-    color: 'violet',
+    // Static Tailwind classes
+    selectedBg: 'bg-violet-50',
+    selectedRing: 'ring-2 ring-violet-500',
+    iconBg: 'bg-violet-100',
+    iconText: 'text-violet-600',
+    panelBorder: 'border-violet-200',
+    panelBg: 'bg-violet-50',
+    headingText: 'text-violet-900',
+    badgeBg: 'bg-violet-200',
+    badgeText: 'text-violet-800',
+    pillSelectedBg: 'bg-violet-600',
+    btnBg: 'bg-violet-600',
+    btnHover: 'hover:bg-violet-700',
+    numberBg: 'bg-violet-100',
+    numberText: 'text-violet-600',
   },
   {
     id: 'region',
@@ -76,7 +89,20 @@ const variantTypes = [
     icon: Globe2,
     description: 'Customize content for different regions',
     options: regions,
-    color: 'blue',
+    selectedBg: 'bg-blue-50',
+    selectedRing: 'ring-2 ring-blue-500',
+    iconBg: 'bg-blue-100',
+    iconText: 'text-blue-600',
+    panelBorder: 'border-blue-200',
+    panelBg: 'bg-blue-50',
+    headingText: 'text-blue-900',
+    badgeBg: 'bg-blue-200',
+    badgeText: 'text-blue-800',
+    pillSelectedBg: 'bg-blue-600',
+    btnBg: 'bg-blue-600',
+    btnHover: 'hover:bg-blue-700',
+    numberBg: 'bg-blue-100',
+    numberText: 'text-blue-600',
   },
   {
     id: 'jobRole',
@@ -84,7 +110,20 @@ const variantTypes = [
     icon: Users,
     description: 'Customize content for different job roles',
     options: jobRoles,
-    color: 'emerald',
+    selectedBg: 'bg-emerald-50',
+    selectedRing: 'ring-2 ring-emerald-500',
+    iconBg: 'bg-emerald-100',
+    iconText: 'text-emerald-600',
+    panelBorder: 'border-emerald-200',
+    panelBg: 'bg-emerald-50',
+    headingText: 'text-emerald-900',
+    badgeBg: 'bg-emerald-200',
+    badgeText: 'text-emerald-800',
+    pillSelectedBg: 'bg-emerald-600',
+    btnBg: 'bg-emerald-600',
+    btnHover: 'hover:bg-emerald-700',
+    numberBg: 'bg-emerald-100',
+    numberText: 'text-emerald-600',
   },
 ]
 
@@ -278,12 +317,12 @@ export default function VariantsStep({ data, updateData, isGenerating, setIsGene
               onClick={() => handleTypeSelect(type.id)}
               className={`p-4 rounded-xl text-left transition-all
                 ${isSelected
-                  ? `bg-${type.color}-50 ring-2 ring-${type.color}-500`
+                  ? `${type.selectedBg} ${type.selectedRing}`
                   : 'bg-white border border-slate-200 hover:border-slate-300 hover:shadow'
                 }`}
             >
-              <div className={`w-10 h-10 rounded-lg bg-${type.color}-100 flex items-center justify-center mb-3`}>
-                <Icon className={`w-5 h-5 text-${type.color}-600`} />
+              <div className={`w-10 h-10 rounded-lg ${type.iconBg} flex items-center justify-center mb-3`}>
+                <Icon className={`w-5 h-5 ${type.iconText}`} />
               </div>
               <h4 className="font-medium text-slate-900 mb-1">{type.label}</h4>
               <p className="text-xs text-slate-500">{type.description}</p>
@@ -301,30 +340,30 @@ export default function VariantsStep({ data, updateData, isGenerating, setIsGene
             exit={{ opacity: 0, height: 0 }}
             className="mb-6"
           >
-            <div className={`p-4 rounded-xl border-2 border-${selectedType.color}-200 bg-${selectedType.color}-50`}>
+            <div className={`p-4 rounded-xl border-2 ${selectedType.panelBorder} ${selectedType.panelBg}`}>
               <div className="flex items-center justify-between mb-3">
-                <h4 className={`font-medium text-${selectedType.color}-900`}>
+                <h4 className={`font-medium ${selectedType.headingText}`}>
                   Select which {selectedType.label.toLowerCase()} to create variants for:
                 </h4>
-                <span className={`text-xs px-2 py-1 rounded-full bg-${selectedType.color}-200 text-${selectedType.color}-800`}>
+                <span className={`text-xs px-2 py-1 rounded-full ${selectedType.badgeBg} ${selectedType.badgeText}`}>
                   {data.selectedVariants?.length || 0} selected
                 </span>
               </div>
               
               <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
                 {selectedType.options.map(option => {
-                  const isSelected = data.selectedVariants?.includes(option)
+                  const isOptionSelected = data.selectedVariants?.includes(option)
                   return (
                     <button
                       key={option}
                       onClick={() => handleOptionToggle(option)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full transition-all
-                        ${isSelected
-                          ? `bg-${selectedType.color}-600 text-white`
-                          : `bg-white text-slate-700 hover:bg-slate-100`
+                        ${isOptionSelected
+                          ? `${selectedType.pillSelectedBg} text-white`
+                          : 'bg-white text-slate-700 hover:bg-slate-100'
                         }`}
                     >
-                      {isSelected && <Check className="w-3.5 h-3.5" />}
+                      {isOptionSelected && <Check className="w-3.5 h-3.5" />}
                       {option}
                     </button>
                   )
@@ -336,7 +375,7 @@ export default function VariantsStep({ data, updateData, isGenerating, setIsGene
                 <button
                   onClick={handleGenerateVariants}
                   disabled={isGenerating}
-                  className={`mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 bg-${selectedType.color}-600 text-white font-medium rounded-xl hover:bg-${selectedType.color}-700 transition-colors disabled:opacity-50`}
+                  className={`mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 ${selectedType.btnBg} text-white font-medium rounded-xl ${selectedType.btnHover} transition-colors disabled:opacity-50`}
                 >
                   {isGenerating ? (
                     <>
@@ -382,7 +421,7 @@ export default function VariantsStep({ data, updateData, isGenerating, setIsGene
                 onClick={() => toggleVariantExpanded(variant.id)}
                 className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors"
               >
-                <div className={`w-8 h-8 rounded-lg bg-${selectedType?.color || 'slate'}-100 flex items-center justify-center text-${selectedType?.color || 'slate'}-600 font-medium text-sm`}>
+                <div className={`w-8 h-8 rounded-lg ${selectedType?.numberBg || 'bg-slate-100'} flex items-center justify-center ${selectedType?.numberText || 'text-slate-600'} font-medium text-sm`}>
                   {index + 1}
                 </div>
                 <div className="flex-1 text-left">

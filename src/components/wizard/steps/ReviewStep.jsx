@@ -21,30 +21,42 @@ const typeConfig = {
   objective: { 
     label: 'Objective', 
     icon: Target, 
-    color: 'violet',
     childType: 'tactic',
     childLabel: 'Tactics',
+    iconBg: 'bg-violet-100',
+    iconText: 'text-violet-600',
+    variantBadgeBg: 'bg-violet-100',
+    variantBadgeText: 'text-violet-700',
   },
   tactic: { 
     label: 'Tactic', 
     icon: Layers, 
-    color: 'blue',
     childType: 'bestPractice',
     childLabel: 'Best Practices',
+    iconBg: 'bg-blue-100',
+    iconText: 'text-blue-600',
+    variantBadgeBg: 'bg-blue-100',
+    variantBadgeText: 'text-blue-700',
   },
   bestPractice: { 
     label: 'Best Practice', 
     icon: BookOpen, 
-    color: 'emerald',
     childType: 'step',
     childLabel: 'Steps',
+    iconBg: 'bg-emerald-100',
+    iconText: 'text-emerald-600',
+    variantBadgeBg: 'bg-emerald-100',
+    variantBadgeText: 'text-emerald-700',
   },
   step: { 
     label: 'Step', 
     icon: ListChecks, 
-    color: 'slate',
     childType: null,
     childLabel: null,
+    iconBg: 'bg-slate-100',
+    iconText: 'text-slate-600',
+    variantBadgeBg: 'bg-slate-100',
+    variantBadgeText: 'text-slate-700',
   },
 }
 
@@ -215,13 +227,13 @@ export default function ReviewStep({ data, updateData, onClose }) {
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center
             ${isCreated 
               ? 'bg-emerald-200' 
-              : `bg-${itemConfig?.color || 'slate'}-100`
+              : itemConfig?.iconBg || 'bg-slate-100'
             }`}
           >
             {isCreated ? (
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             ) : (
-              <ItemIcon className={`w-4 h-4 text-${itemConfig?.color || 'slate'}-600`} />
+              <ItemIcon className={`w-4 h-4 ${itemConfig?.iconText || 'text-slate-600'}`} />
             )}
           </div>
           
@@ -232,7 +244,7 @@ export default function ReviewStep({ data, updateData, onClose }) {
                 <span className="px-1.5 py-0.5 text-xs bg-slate-200 text-slate-600 rounded">Main</span>
               )}
               {item.isVariant && (
-                <span className={`px-1.5 py-0.5 text-xs bg-${itemConfig?.color || 'slate'}-100 text-${itemConfig?.color || 'slate'}-700 rounded`}>
+                <span className={`px-1.5 py-0.5 text-xs rounded ${itemConfig?.variantBadgeBg || 'bg-slate-100'} ${itemConfig?.variantBadgeText || 'text-slate-700'}`}>
                   Variant
                 </span>
               )}
