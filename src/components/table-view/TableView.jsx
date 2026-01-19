@@ -14,11 +14,9 @@ import DraggableRow from './DraggableRow'
 import DroppableObjective from './DroppableObjective'
 import DraggableDroppableRow from './DraggableDroppableRow'
 import DragConfirmModal from './DragConfirmModal'
-import PerspectiveSwitcher from './PerspectiveSwitcher'
-import { groupByIndustry, groupByAccount } from '../../data/relationships'
 
 export default function TableView() {
-  const { items, perspective, getFilteredItems, moveItem, duplicateItemTo } = useFuel()
+  const { items, getFilteredItems, moveItem, duplicateItemTo } = useFuel()
   const [activeId, setActiveId] = useState(null)
   const [activeItem, setActiveItem] = useState(null)
   
@@ -107,18 +105,6 @@ export default function TableView() {
     setActiveItem(null)
   }
   
-  // Group items based on perspective
-  const renderContent = () => {
-    switch (perspective) {
-      case 'industry':
-        return <IndustryView items={filteredItems} />
-      case 'account':
-        return <AccountView items={filteredItems} />
-      default:
-        return <HierarchyView objectives={objectives} items={filteredItems} activeId={activeId} />
-    }
-  }
-  
   return (
     <DndContext 
       sensors={sensors}
@@ -128,17 +114,10 @@ export default function TableView() {
       onDragCancel={handleDragCancel}
     >
       <div className="h-full flex flex-col">
-        {/* Perspective Switcher */}
-        <div className="mb-4">
-          <PerspectiveSwitcher />
-        </div>
-        
         {/* Drag hint */}
-        {perspective === 'hierarchy' && (
-          <div className="mb-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">
-            💡 Tip: Drag items to move them between parents. Right-click for more options.
-          </div>
-        )}
+        <div className="mb-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">
+          💡 Tip: Drag items to move them between parents. Right-click for more options.
+        </div>
         
         {/* Table Header */}
         <div className="bg-white rounded-t-lg border border-slate-200 border-b-0">
@@ -157,7 +136,7 @@ export default function TableView() {
         
         {/* Table Body */}
         <div className="flex-1 bg-white rounded-b-lg border border-slate-200 overflow-auto">
-          {renderContent()}
+          <HierarchyView objectives={objectives} items={filteredItems} activeId={activeId} />
         </div>
       </div>
       
@@ -269,72 +248,6 @@ function HierarchyView({ objectives, items, activeId }) {
   return (
     <div>
       {objectives.map(obj => renderItemWithChildren(obj, 0))}
-    </div>
-  )
-}
-
-function IndustryView({ items }) {
-  const { selectItem } = useFuel()
-  const groups = groupByIndustry(items)
-  
-  return (
-    <div className="divide-y divide-slate-100">
-      {Object.entries(groups).map(([industry, industryItems]) => (
-        <div key={industry} className="py-2">
-          <div className="px-4 py-2 bg-slate-50">
-            <h3 className="text-sm font-semibold text-slate-700">
-              {industry}
-              <span className="ml-2 text-xs font-normal text-slate-500">
-                ({industryItems.length} items)
-              </span>
-            </h3>
-          </div>
-          {industryItems.map(item => (
-            <HierarchyRow
-              key={item.id}
-              item={item}
-              depth={0}
-              isExpanded={false}
-              hasChildren={false}
-              onToggle={() => {}}
-              onSelect={() => selectItem(item.id)}
-            />
-          ))}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function AccountView({ items }) {
-  const { selectItem } = useFuel()
-  const groups = groupByAccount(items)
-  
-  return (
-    <div className="divide-y divide-slate-100">
-      {Object.entries(groups).map(([account, accountItems]) => (
-        <div key={account} className="py-2">
-          <div className="px-4 py-2 bg-slate-50">
-            <h3 className="text-sm font-semibold text-slate-700">
-              {account}
-              <span className="ml-2 text-xs font-normal text-slate-500">
-                ({accountItems.length} items)
-              </span>
-            </h3>
-          </div>
-          {accountItems.map(item => (
-            <HierarchyRow
-              key={item.id}
-              item={item}
-              depth={0}
-              isExpanded={false}
-              hasChildren={false}
-              onToggle={() => {}}
-              onSelect={() => selectItem(item.id)}
-            />
-          ))}
-        </div>
-      ))}
     </div>
   )
 }
