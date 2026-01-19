@@ -179,24 +179,29 @@ export default function TableView() {
           💡 Tip: Drag items to move them between parents. Right-click for more options.
         </div>
         
-        {/* Table Header */}
-        <div className="bg-white rounded-t-lg border border-slate-200 border-b-0">
-          <div className="grid grid-cols-[56px_1fr_100px_120px_100px_80px_80px_100px_140px] gap-2 px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-            <div></div>
-            <div>Name</div>
-            <div>Impact</div>
-            <div>Targeting</div>
-            <div>Status</div>
-            <div>Quality</div>
-            <div>Usage</div>
-            <div>Last Edit</div>
-            <div></div>
+        {/* Scrollable Table Container */}
+        <div className="flex-1 overflow-x-auto overflow-y-auto bg-white rounded-lg border border-slate-200">
+          <div className="min-w-[1000px]">
+            {/* Table Header */}
+            <div className="sticky top-0 z-10 bg-white border-b border-slate-200">
+              <div className="grid grid-cols-[56px_1fr_100px_120px_100px_80px_80px_100px_140px] gap-2 px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <div></div>
+                <div>Name</div>
+                <div>Impact</div>
+                <div>Targeting</div>
+                <div>Status</div>
+                <div>Quality</div>
+                <div>Usage</div>
+                <div>Last Edit</div>
+                <div></div>
+              </div>
+            </div>
+            
+            {/* Table Body */}
+            <div>
+              <HierarchyView objectives={objectives} items={filteredItems} activeId={activeId} />
+            </div>
           </div>
-        </div>
-        
-        {/* Table Body */}
-        <div className="flex-1 bg-white rounded-b-lg border border-slate-200 overflow-auto">
-          <HierarchyView objectives={objectives} items={filteredItems} activeId={activeId} />
         </div>
       </div>
       
