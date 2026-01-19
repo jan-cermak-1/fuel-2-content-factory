@@ -229,16 +229,16 @@ export default function ReviewStep({ data, updateData, onClose }) {
             <div className="flex items-center gap-2">
               <p className="font-medium text-slate-900">{item.name}</p>
               {item.isMain && (
-                <span className="px-1.5 py-0.5 text-xs bg-slate-200 text-slate-600 rounded">Hlavní</span>
+                <span className="px-1.5 py-0.5 text-xs bg-slate-200 text-slate-600 rounded">Main</span>
               )}
               {item.isVariant && (
                 <span className={`px-1.5 py-0.5 text-xs bg-${itemConfig?.color || 'slate'}-100 text-${itemConfig?.color || 'slate'}-700 rounded`}>
-                  Varianta
+                  Variant
                 </span>
               )}
             </div>
             <p className="text-xs text-slate-500">
-              {itemConfig?.label} • {item.targeting?.industries?.[0] || item.targeting?.regions?.[0] || item.targeting?.jobRoles?.[0] || 'Všechny segmenty'}
+              {itemConfig?.label} • {item.targeting?.industries?.[0] || item.targeting?.regions?.[0] || item.targeting?.jobRoles?.[0] || 'All segments'}
             </p>
           </div>
           
@@ -273,14 +273,14 @@ export default function ReviewStep({ data, updateData, onClose }) {
               <div className="px-4 pb-4 border-t border-slate-100">
                 <div className="mt-3 space-y-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Popis</label>
-                    <p className="text-sm text-slate-700">{item.description || 'Bez popisu'}</p>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Description</label>
+                    <p className="text-sm text-slate-700">{item.description || 'No description'}</p>
                   </div>
                   
                   {item.settings && (
                     <div className="p-3 bg-violet-50 rounded-lg text-xs space-y-1">
-                      <div><span className="font-medium text-violet-700">Metriky:</span> {item.settings.metrics?.join(', ')}</div>
-                      <div><span className="font-medium text-violet-700">Baseline → Cíl:</span> {item.settings.baseline} → {item.settings.target}</div>
+                      <div><span className="font-medium text-violet-700">Metrics:</span> {item.settings.metrics?.join(', ')}</div>
+                      <div><span className="font-medium text-violet-700">Baseline → Target:</span> {item.settings.baseline} → {item.settings.target}</div>
                     </div>
                   )}
                   
@@ -326,11 +326,11 @@ export default function ReviewStep({ data, updateData, onClose }) {
         </motion.div>
         
         <h3 className="text-2xl font-bold text-slate-900 mb-2">
-          Hotovo!
+          Done!
         </h3>
         <p className="text-slate-600 mb-8">
-          Úspěšně vytvořeno {mainCreated.length} {mainCreated.length === 1 ? 'položka' : 'položek'}
-          {childrenCreated.length > 0 && ` a ${childrenCreated.length} ${config.childLabel?.toLowerCase() || 'vnořených položek'}`}.
+          Successfully created {mainCreated.length} {mainCreated.length === 1 ? 'item' : 'items'}
+          {childrenCreated.length > 0 && ` and ${childrenCreated.length} ${config.childLabel?.toLowerCase() || 'nested items'}`}.
         </p>
         
         <div className="space-y-3 text-left mb-8">
@@ -360,7 +360,7 @@ export default function ReviewStep({ data, updateData, onClose }) {
           onClick={onClose}
           className="px-8 py-3 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 transition-colors"
         >
-          Zavřít wizard
+          Close wizard
         </button>
       </div>
     )
@@ -370,10 +370,10 @@ export default function ReviewStep({ data, updateData, onClose }) {
     <div className="p-8 max-w-3xl mx-auto">
       <div className="text-center mb-8">
         <h3 className="text-xl font-bold text-slate-900 mb-2">
-          Zkontroluj a vytvoř
+          Review and create
         </h3>
         <p className="text-slate-600">
-          Přehled všech položek k vytvoření. Můžeš je upravit před uložením.
+          Overview of all items to create. You can edit them before saving.
         </p>
       </div>
       
@@ -385,7 +385,7 @@ export default function ReviewStep({ data, updateData, onClose }) {
         </div>
         <div className="p-4 bg-slate-50 rounded-xl text-center">
           <p className="text-2xl font-bold text-slate-900">{variantItems.length}</p>
-          <p className="text-sm text-slate-600">Variant</p>
+          <p className="text-sm text-slate-600">Variants</p>
         </div>
         <div className="p-4 bg-slate-50 rounded-xl text-center">
           <p className="text-2xl font-bold text-slate-900">
@@ -412,16 +412,16 @@ export default function ReviewStep({ data, updateData, onClose }) {
             />
             <div className="flex-1">
               <p className="font-medium text-teal-900">
-                Také vygenerovat {config.childLabel}
+                Also generate {config.childLabel}
               </p>
               <p className="text-sm text-teal-700 mb-3">
-                AI navrhlo {suggestedChildren.length} položek, které můžeš vytvořit rovnou.
+                AI suggested {suggestedChildren.length} items that you can create right away.
               </p>
               
               {data.includeChildren && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                    <label className="text-sm text-teal-700">Počet:</label>
+                    <label className="text-sm text-teal-700">Count:</label>
                     <input
                       type="range"
                       min="1"
@@ -457,12 +457,12 @@ export default function ReviewStep({ data, updateData, onClose }) {
         {isCreating ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            Vytvářím {createdItems.length} z {allItems.length + (data.includeChildren ? Math.min(suggestedChildren.length, data.childCount || 3) : 0)}...
+            Creating {createdItems.length} of {allItems.length + (data.includeChildren ? Math.min(suggestedChildren.length, data.childCount || 3) : 0)}...
           </>
         ) : (
           <>
             <Sparkles className="w-5 h-5" />
-            Vytvořit {allItems.length} {allItems.length === 1 ? 'položku' : 'položek'}
+            Create {allItems.length} {allItems.length === 1 ? 'item' : 'items'}
             {data.includeChildren && suggestedChildren.length > 0 && 
               ` + ${Math.min(suggestedChildren.length, data.childCount || 3)} ${config.childLabel?.toLowerCase()}`
             }
@@ -475,7 +475,7 @@ export default function ReviewStep({ data, updateData, onClose }) {
         <div className="mt-4 flex items-start gap-2 p-3 bg-amber-50 rounded-lg">
           <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
           <p className="text-sm text-amber-800">
-            Některé položky nemají název. Doporučujeme je pojmenovat před vytvořením.
+            Some items don't have a name. We recommend naming them before creating.
           </p>
         </div>
       )}

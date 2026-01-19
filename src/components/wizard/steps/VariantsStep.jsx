@@ -64,25 +64,25 @@ const jobRoles = [
 const variantTypes = [
   {
     id: 'industry',
-    label: 'Podle odvětví',
+    label: 'By Industry',
     icon: Building2,
-    description: 'Přizpůsobit obsah pro různá odvětví',
+    description: 'Customize content for different industries',
     options: industries,
     color: 'violet',
   },
   {
     id: 'region',
-    label: 'Podle regionu',
+    label: 'By Region',
     icon: Globe2,
-    description: 'Přizpůsobit obsah pro různé regiony',
+    description: 'Customize content for different regions',
     options: regions,
     color: 'blue',
   },
   {
     id: 'jobRole',
-    label: 'Podle role',
+    label: 'By Role',
     icon: Users,
-    description: 'Přizpůsobit obsah pro různé job role',
+    description: 'Customize content for different job roles',
     options: jobRoles,
     color: 'emerald',
   },
@@ -250,10 +250,10 @@ export default function VariantsStep({ data, updateData, isGenerating, setIsGene
     <div className="p-8 max-w-3xl mx-auto">
       <div className="text-center mb-8">
         <h3 className="text-xl font-bold text-slate-900 mb-2">
-          Chceš vytvořit varianty?
+          Do you want to create variants?
         </h3>
         <p className="text-slate-600">
-          AI přizpůsobí obsah pro různé segmenty - změní příklady, terminologii a doporučení.
+          AI will customize content for different segments - changing examples, terminology, and recommendations.
         </p>
       </div>
       
@@ -261,7 +261,7 @@ export default function VariantsStep({ data, updateData, isGenerating, setIsGene
       {!data.variantBy && (
         <div className="mb-6 p-4 bg-slate-50 rounded-xl text-center">
           <p className="text-sm text-slate-600">
-            Tento krok je volitelný. Můžeš ho přeskočit a vytvořit pouze jednu verzi.
+            This step is optional. You can skip it and create only one version.
           </p>
         </div>
       )}
@@ -304,10 +304,10 @@ export default function VariantsStep({ data, updateData, isGenerating, setIsGene
             <div className={`p-4 rounded-xl border-2 border-${selectedType.color}-200 bg-${selectedType.color}-50`}>
               <div className="flex items-center justify-between mb-3">
                 <h4 className={`font-medium text-${selectedType.color}-900`}>
-                  Vyber pro které {selectedType.label.toLowerCase()} vytvořit varianty:
+                  Select which {selectedType.label.toLowerCase()} to create variants for:
                 </h4>
                 <span className={`text-xs px-2 py-1 rounded-full bg-${selectedType.color}-200 text-${selectedType.color}-800`}>
-                  {data.selectedVariants?.length || 0} vybráno
+                  {data.selectedVariants?.length || 0} selected
                 </span>
               </div>
               
@@ -341,12 +341,12 @@ export default function VariantsStep({ data, updateData, isGenerating, setIsGene
                   {isGenerating ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Generuji {data.selectedVariants.length} variant...
+                      Generating {data.selectedVariants.length} variants...
                     </>
                   ) : (
                     <>
                       <Sparkles className="w-5 h-5" />
-                      Vygenerovat {data.selectedVariants.length} variant
+                      Generate {data.selectedVariants.length} variants
                     </>
                   )}
                 </button>
@@ -365,11 +365,11 @@ export default function VariantsStep({ data, updateData, isGenerating, setIsGene
         >
           <div className="flex items-center justify-between">
             <h4 className="font-semibold text-slate-900">
-              Vygenerované varianty ({data.generatedVariants.length})
+              Generated variants ({data.generatedVariants.length})
             </h4>
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <Copy className="w-3.5 h-3.5" />
-              Každá varianta má přizpůsobený obsah
+              Each variant has customized content
             </div>
           </div>
           
@@ -407,16 +407,16 @@ export default function VariantsStep({ data, updateData, isGenerating, setIsGene
                     <div className="px-4 pb-4 border-t border-slate-100">
                       <div className="mt-3 space-y-3">
                         <div>
-                          <label className="block text-xs font-medium text-slate-500 mb-1">Název</label>
+                          <label className="block text-xs font-medium text-slate-500 mb-1">Name</label>
                           <p className="text-sm text-slate-900">{variant.name}</p>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-slate-500 mb-1">Popis (přizpůsobený)</label>
+                          <label className="block text-xs font-medium text-slate-500 mb-1">Description (customized)</label>
                           <p className="text-sm text-slate-700">{variant.description}</p>
                         </div>
                         {variant.adaptationNotes?.contextTerms && (
                           <div className="p-3 bg-slate-50 rounded-lg">
-                            <label className="block text-xs font-medium text-slate-500 mb-2">AI adaptace zahrnuje:</label>
+                            <label className="block text-xs font-medium text-slate-500 mb-2">AI adaptation includes:</label>
                             <div className="flex flex-wrap gap-1.5">
                               {variant.adaptationNotes.contextTerms.map((term, i) => (
                                 <span key={i} className="px-2 py-0.5 text-xs bg-slate-200 text-slate-700 rounded-full">
@@ -444,12 +444,12 @@ export default function VariantsStep({ data, updateData, isGenerating, setIsGene
             <div>
               <p className="font-medium text-teal-900">
                 {data.generatedVariants?.length > 0
-                  ? `V dalším kroku vytvoříš ${data.generatedVariants.length + 1} položek (1 hlavní + ${data.generatedVariants.length} variant)`
-                  : 'V dalším kroku vytvoříš 1 položku'
+                  ? `In the next step, you'll create ${data.generatedVariants.length + 1} items (1 main + ${data.generatedVariants.length} variants)`
+                  : 'In the next step, you\'ll create 1 item'
                 }
               </p>
               <p className="text-sm text-teal-700 mt-1">
-                Můžeš také vygenerovat vnořené položky (tactics, best practices, steps).
+                You can also generate nested items (tactics, best practices, steps).
               </p>
             </div>
           </div>

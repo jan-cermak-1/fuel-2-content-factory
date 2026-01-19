@@ -265,12 +265,12 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-600 mb-1.5">Cíl</label>
+              <label className="block text-xs text-slate-600 mb-1.5">Target</label>
               <input
                 type="text"
                 value={data.targetValue || ''}
                 onChange={(e) => updateData({ targetValue: e.target.value })}
-                placeholder="např. 5%"
+                placeholder="e.g. 5%"
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white"
               />
             </div>
@@ -283,7 +283,7 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
                 type="text"
                 value={data.deadline || ''}
                 onChange={(e) => updateData({ deadline: e.target.value })}
-                placeholder="např. Q4 2024"
+                placeholder="e.g. Q4 2024"
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white"
               />
             </div>
@@ -306,7 +306,7 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
               onChange={(e) => updateData({ contentStructure: e.target.value })}
               className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white"
             >
-              <option value="">Auto-detect z promptu</option>
+              <option value="">Auto-detect from prompt</option>
               {contentStructures.map(cs => (
                 <option key={cs} value={cs}>{cs}</option>
               ))}
@@ -316,13 +316,13 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
           {/* Media Types */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Zahrnout média
+              Include media
             </label>
             <div className="flex gap-2">
               {[
-                { key: 'images', label: 'Obrázky', icon: Image },
-                { key: 'videos', label: 'Videa', icon: Video },
-                { key: 'tables', label: 'Tabulky', icon: Table },
+                { key: 'images', label: 'Images', icon: Image },
+                { key: 'videos', label: 'Videos', icon: Video },
+                { key: 'tables', label: 'Tables', icon: Table },
               ].map(({ key, label, icon: MediaIcon }) => (
                 <button
                   key={key}
@@ -352,7 +352,7 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
       return (
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-2">
-            Typ akce
+            Action type
           </label>
           <div className="grid grid-cols-2 gap-2">
             {stepTypes.map(({ id, label, icon: StepIcon }) => (
@@ -391,18 +391,18 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
           
           {/* Objective settings */}
           {content.settings && (
-            <div className="mt-4 p-3 bg-violet-50 rounded-lg text-xs space-y-1">
-              <div><span className="font-medium text-violet-700">Metriky:</span> {content.settings.metrics?.join(', ')}</div>
-              <div><span className="font-medium text-violet-700">Zdroje:</span> {content.settings.dataSources?.join(', ')}</div>
-              <div><span className="font-medium text-violet-700">Baseline → Cíl:</span> {content.settings.baseline} → {content.settings.target}</div>
-              <div><span className="font-medium text-violet-700">Deadline:</span> {content.settings.deadline}</div>
-            </div>
+                    <div className="mt-4 p-3 bg-violet-50 rounded-lg text-xs space-y-1">
+                      <div><span className="font-medium text-violet-700">Metrics:</span> {content.settings.metrics?.join(', ')}</div>
+                      <div><span className="font-medium text-violet-700">Sources:</span> {content.settings.dataSources?.join(', ')}</div>
+                      <div><span className="font-medium text-violet-700">Baseline → Target:</span> {content.settings.baseline} → {content.settings.target}</div>
+                      <div><span className="font-medium text-violet-700">Deadline:</span> {content.settings.deadline}</div>
+                    </div>
           )}
           
           {/* Content outline */}
           {content.contentOutline && (
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <h5 className="text-xs font-medium text-blue-900 mb-2">Struktura obsahu:</h5>
+                      <h5 className="text-xs font-medium text-blue-900 mb-2">Content structure:</h5>
               <div className="space-y-1">
                 {content.contentOutline.map((item, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs">
@@ -429,7 +429,7 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
         {(content.suggestedTactics || content.suggestedBestPractices || content.suggestedSteps) && (
           <div className="p-4 bg-teal-50 rounded-xl border border-teal-200">
             <h4 className="text-sm font-semibold text-teal-900 mb-3">
-              Navrhované položky (vygenerují se v Review):
+              Suggested items (will be generated in Review):
             </h4>
             <div className="space-y-2">
               {(content.suggestedTactics || content.suggestedBestPractices || content.suggestedSteps || []).map((item, i) => (
@@ -510,12 +510,12 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
         {isGenerating ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            Generuji obsah...
+            Generating content...
           </>
         ) : (
           <>
             <Sparkles className="w-5 h-5" />
-            Vygenerovat {config?.label}
+            Generate {config?.label}
           </>
         )}
       </button>
@@ -527,7 +527,7 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
             onClick={() => toggleSection('preview')}
             className="w-full flex items-center justify-between p-4 bg-emerald-50 hover:bg-emerald-100 transition-colors"
           >
-            <span className="font-medium text-emerald-900">Vygenerovaný obsah</span>
+            <span className="font-medium text-emerald-900">Generated content</span>
             <div className="flex items-center gap-2">
               <button
                 onClick={(e) => {
@@ -535,7 +535,7 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
                   handleGenerate()
                 }}
                 className="p-1.5 hover:bg-emerald-200 rounded-lg transition-colors"
-                title="Regenerovat"
+                title="Regenerate"
               >
                 <RefreshCw className="w-4 h-4 text-emerald-600" />
               </button>
