@@ -156,7 +156,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }) {
   
   return (
     <motion.aside 
-      className="h-screen bg-white border-r border-slate-200 flex flex-col flex-shrink-0"
+      className="h-screen bg-white flex flex-col flex-shrink-0"
       animate={{ width: isCollapsed ? 64 : 240 }}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
     >

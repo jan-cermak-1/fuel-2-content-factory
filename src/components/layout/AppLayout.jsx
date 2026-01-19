@@ -13,7 +13,7 @@ import AIGenerationPanel from '../panels/AIGenerationPanel'
 import FilterPanel from '../panels/FilterPanel'
 
 export default function AppLayout() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
   const { 
     activeTab, 
     viewMode, 
