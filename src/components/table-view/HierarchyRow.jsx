@@ -128,7 +128,7 @@ export default function HierarchyRow({
       </div>
       
       {/* Name with type badge - tree structure with connecting lines */}
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center gap-2 min-w-0 relative">
         {/* Tree connector lines - extends beyond row boundaries for seamless connections */}
         {typeInfo.indent > 0 && (
           <div 
@@ -188,6 +188,20 @@ export default function HierarchyRow({
             })}
           </div>
         )}
+        
+        {/* Downward line from expanded parent to children */}
+        {isExpanded && hasChildren && (
+          <div 
+            className="absolute bg-slate-300"
+            style={{ 
+              left: typeInfo.indent * 20 + 9 + (typeInfo.indent > 0 ? 0 : 0),
+              width: 1,
+              top: 30,
+              height: 30
+            }}
+          />
+        )}
+        
         <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${typeInfo.color} flex-shrink-0`}>
           {typeInfo.label}
         </span>

@@ -14,10 +14,17 @@ export default function DraggableDroppableRow({ item, ...props }) {
     id: item.id,
   })
   
-  // Droppable functionality
-  const { isOver, setNodeRef: setDropRef } = useDroppable({
+  // Droppable for children (e.g., BP receives steps)
+  const { isOver: isOverForChildren, setNodeRef: setChildDropRef } = useDroppable({
     id: `dropzone-${item.id}`,
   })
+  
+  // Droppable for sibling reordering (e.g., BP receives other BPs for reorder)
+  const { isOver: isOverForReorder, setNodeRef: setReorderDropRef } = useDroppable({
+    id: `reorder-${item.id}`,
+  })
+  
+  const isOver = isOverForChildren || isOverForReorder
   
   const style = transform ? {
     transform: CSS.Translate.toString(transform),
@@ -26,7 +33,8 @@ export default function DraggableDroppableRow({ item, ...props }) {
   // Combine refs
   const setNodeRef = (node) => {
     setDragRef(node)
-    setDropRef(node)
+    setChildDropRef(node)
+    setReorderDropRef(node)
   }
   
   return (

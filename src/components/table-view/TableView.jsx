@@ -16,7 +16,7 @@ import DraggableDroppableRow from './DraggableDroppableRow'
 import DragConfirmModal from './DragConfirmModal'
 
 export default function TableView() {
-  const { items, getFilteredItems, moveItem, duplicateItemTo } = useFuel()
+  const { items, getFilteredItems, moveItem, duplicateItemTo, reorderChildInParent } = useFuel()
   const [activeId, setActiveId] = useState(null)
   const [activeItem, setActiveItem] = useState(null)
   
@@ -57,22 +57,44 @@ export default function TableView() {
         targetId = targetId.replace('dropzone-', '')
       }
       
-      const targetParent = items.find(i => i.id === targetId)
+      // Handle reorder prefix (sibling reordering)
+      const isReorder = targetId.startsWith('reorder-')
+      if (isReorder) {
+        targetId = targetId.replace('reorder-', '')
+      }
       
-      // Check if dropping on a valid parent
-      if (draggedItem && targetParent) {
+      const targetItem = items.find(i => i.id === targetId)
+      
+      if (draggedItem && targetItem) {
+        // Check if this is a sibling reorder (same type, same parent)
+        if (draggedItem.type === targetItem.type) {
+          // Find if they share a common parent
+          const commonParentId = draggedItem.parentIds?.find(pid => 
+            targetItem.parentIds?.includes(pid)
+          )
+          
+          if (commonParentId) {
+            // Reorder within parent - no confirmation needed
+            reorderChildInParent(draggedItem.id, targetItem.id, 'after')
+            setActiveId(null)
+            setActiveItem(null)
+            return
+          }
+        }
+        
+        // Check if dropping on a valid parent (different parent)
         const validMoves = {
           'tactic': 'objective',
           'bestPractice': 'tactic',
           'step': 'bestPractice',
         }
         
-        if (validMoves[draggedItem.type] === targetParent.type) {
-          // Show confirmation modal
+        if (validMoves[draggedItem.type] === targetItem.type) {
+          // Show confirmation modal for moving to different parent
           setDragConfirm({
             isOpen: true,
             item: draggedItem,
-            targetParent: targetParent,
+            targetParent: targetItem,
           })
         }
       }

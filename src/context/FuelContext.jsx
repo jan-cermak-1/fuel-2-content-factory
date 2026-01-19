@@ -216,6 +216,49 @@ export function FuelProvider({ children }) {
     return newItems.map(i => i.id)
   }, [items])
   
+  // Reorder item within the same parent (no confirmation needed)
+  const reorderChildInParent = useCallback((itemId, targetSiblingId, position = 'after') => {
+    setItems(prev => {
+      const itemToMove = prev.find(i => i.id === itemId)
+      const targetSibling = prev.find(i => i.id === targetSiblingId)
+      
+      if (!itemToMove || !targetSibling) return prev
+      
+      // Items must be of the same type
+      if (itemToMove.type !== targetSibling.type) return prev
+      
+      // Find common parent
+      const commonParentId = itemToMove.parentIds?.find(pid => 
+        targetSibling.parentIds?.includes(pid)
+      )
+      
+      if (!commonParentId) return prev
+      
+      return prev.map(item => {
+        if (item.id === commonParentId && item.childIds) {
+          const childIds = [...item.childIds]
+          const fromIndex = childIds.indexOf(itemId)
+          const toIndex = childIds.indexOf(targetSiblingId)
+          
+          if (fromIndex === -1 || toIndex === -1) return item
+          
+          // Remove from current position
+          childIds.splice(fromIndex, 1)
+          
+          // Insert at new position
+          const insertIndex = position === 'after' 
+            ? (fromIndex < toIndex ? toIndex : toIndex + 1)
+            : (fromIndex < toIndex ? toIndex - 1 : toIndex)
+          
+          childIds.splice(Math.max(0, insertIndex), 0, itemId)
+          
+          return { ...item, childIds }
+        }
+        return item
+      })
+    })
+  }, [])
+  
   // Move item to new parent
   const moveItem = useCallback((itemId, newParentId) => {
     setItems(prev => {
@@ -430,6 +473,7 @@ export function FuelProvider({ children }) {
     duplicateItemTo,
     duplicateItemToMultiple,
     moveItem,
+    reorderChildInParent,
     
     // Getters
     getFilteredItems,
