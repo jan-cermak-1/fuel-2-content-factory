@@ -80,7 +80,7 @@ export default function HierarchyRow({
   
   return (
     <div 
-      className={`group grid grid-cols-[56px_1fr_100px_120px_100px_80px_80px_100px_140px] gap-2 px-4 py-2 items-center border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer
+      className={`group grid grid-cols-[56px_1fr_100px_120px_100px_80px_80px_100px_140px] gap-2 px-4 py-2.5 items-center border-b border-slate-100 hover:bg-slate-50/50 transition-colors cursor-pointer relative
         ${isDragging ? 'bg-teal-50 shadow-lg' : ''}
         ${isDropTarget ? 'bg-teal-50' : ''}`}
       onClick={(e) => {
@@ -129,31 +129,31 @@ export default function HierarchyRow({
       
       {/* Name with type badge - tree structure with connecting lines */}
       <div className="flex items-center gap-2 min-w-0">
-        {/* Tree connector lines */}
+        {/* Tree connector lines - extends beyond row boundaries for seamless connections */}
         {typeInfo.indent > 0 && (
-          <div className="flex items-stretch flex-shrink-0 relative" style={{ width: typeInfo.indent * 20 }}>
+          <div 
+            className="flex-shrink-0 relative" 
+            style={{ width: typeInfo.indent * 20, height: 60, marginTop: -10, marginBottom: -10 }}
+          >
             {/* Render vertical lines for each depth level */}
             {Array.from({ length: typeInfo.indent }).map((_, levelIndex) => {
-              // For continuation lines at previous levels
+              // For continuation lines at previous levels (items above have more siblings)
               const showContinuationLine = levelIndex < typeInfo.indent - 1 && connectorLevels[levelIndex]
               // For the current level (where we draw the corner/T connector)
               const isCurrentLevel = levelIndex === typeInfo.indent - 1
+              const lineX = levelIndex * 20 + 9
               
               return (
-                <div 
-                  key={levelIndex}
-                  className="relative flex-shrink-0 h-10"
-                  style={{ width: 20 }}
-                >
-                  {/* Continuation vertical line from previous siblings */}
+                <div key={levelIndex}>
+                  {/* Continuation vertical line - full height through row for siblings at this level */}
                   {showContinuationLine && (
                     <div 
                       className="absolute bg-slate-300"
                       style={{ 
-                        left: 9, 
-                        width: 2, 
-                        top: -20, 
-                        bottom: -20
+                        left: lineX, 
+                        width: 1, 
+                        top: 0,
+                        height: 60
                       }}
                     />
                   )}
@@ -161,25 +161,24 @@ export default function HierarchyRow({
                   {/* Current level connector */}
                   {isCurrentLevel && (
                     <>
-                      {/* Vertical line - full height if has more siblings, half if last */}
+                      {/* Vertical line - full height if more siblings, half if last */}
                       <div 
                         className="absolute bg-slate-300"
                         style={{ 
-                          left: 9, 
-                          width: 2,
-                          top: -20,
-                          bottom: isLastSibling ? '50%' : -20
+                          left: lineX, 
+                          width: 1,
+                          top: 0,
+                          height: isLastSibling ? 30 : 60
                         }}
                       />
-                      {/* Horizontal connector */}
+                      {/* Horizontal connector to badge */}
                       <div 
                         className="absolute bg-slate-300"
                         style={{ 
-                          left: 9, 
-                          top: '50%', 
+                          left: lineX, 
+                          top: 30, 
                           width: 10, 
-                          height: 2,
-                          transform: 'translateY(-50%)'
+                          height: 1
                         }}
                       />
                     </>
