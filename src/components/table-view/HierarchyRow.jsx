@@ -39,7 +39,8 @@ export default function HierarchyRow({
   onSelect,
   dragHandleProps,
   isDragging,
-  isDropTarget
+  isDropTarget,
+  treeProps = { connectorLevels: [], isLastSibling: true }
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -47,6 +48,7 @@ export default function HierarchyRow({
   
   const typeInfo = typeConfig[item.type]
   const indent = depth * 24
+  const { connectorLevels, isLastSibling } = treeProps
   
   // Get parent count for many-to-many indicator
   const parentCount = item.parentIds?.length || 0
@@ -78,7 +80,7 @@ export default function HierarchyRow({
   
   return (
     <div 
-      className={`group grid grid-cols-[40px_1fr_100px_120px_100px_80px_80px_100px_140px] gap-2 px-4 py-2 items-center border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer
+      className={`group grid grid-cols-[56px_1fr_100px_120px_100px_80px_80px_100px_140px] gap-2 px-4 py-2 items-center border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer
         ${isDragging ? 'bg-teal-50 shadow-lg' : ''}
         ${isDropTarget ? 'bg-teal-50' : ''}`}
       onClick={(e) => {
@@ -90,8 +92,21 @@ export default function HierarchyRow({
       }}
     >
       {/* Expand/Collapse + Drag Handle */}
-      <div className="flex items-center">
-        {/* Expand/collapse button - always at left edge */}
+      <div className="flex items-center gap-0.5">
+        {/* Drag Handle - visible for draggable items, shown first */}
+        {canDrag && dragHandleProps ? (
+          <button
+            {...dragHandleProps}
+            className="p-1 text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing transition-colors flex-shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical className="w-4 h-4" />
+          </button>
+        ) : (
+          <div className="w-6 flex-shrink-0" />
+        )}
+        
+        {/* Expand/collapse button */}
         {hasChildren ? (
           <button
             onClick={(e) => {
@@ -110,32 +125,68 @@ export default function HierarchyRow({
         ) : (
           <div className="w-6 flex-shrink-0" />
         )}
-        
-        {/* Indent spacer - visual hierarchy indicator */}
-        {depth > 0 && <div style={{ width: (depth - 1) * 16 + 8 }} className="flex-shrink-0" />}
-        
-        {/* Drag Handle - only for draggable items */}
-        {canDrag && dragHandleProps && (
-          <button
-            {...dragHandleProps}
-            className="p-0.5 text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <GripVertical className="w-3 h-3" />
-          </button>
-        )}
       </div>
       
-      {/* Name with type badge - indented based on hierarchy level */}
+      {/* Name with type badge - tree structure with connecting lines */}
       <div className="flex items-center gap-2 min-w-0">
-        {/* Type-based indent spacer */}
+        {/* Tree connector lines */}
         {typeInfo.indent > 0 && (
-          <div 
-            className="flex items-center flex-shrink-0"
-            style={{ width: typeInfo.indent * 24 }}
-          >
-            {/* Hierarchy connector line */}
-            <div className="h-full border-l-2 border-slate-200 ml-2" />
+          <div className="flex items-stretch flex-shrink-0 relative" style={{ width: typeInfo.indent * 20 }}>
+            {/* Render vertical lines for each depth level */}
+            {Array.from({ length: typeInfo.indent }).map((_, levelIndex) => {
+              // For continuation lines at previous levels
+              const showContinuationLine = levelIndex < typeInfo.indent - 1 && connectorLevels[levelIndex]
+              // For the current level (where we draw the corner/T connector)
+              const isCurrentLevel = levelIndex === typeInfo.indent - 1
+              
+              return (
+                <div 
+                  key={levelIndex}
+                  className="relative flex-shrink-0 h-10"
+                  style={{ width: 20 }}
+                >
+                  {/* Continuation vertical line from previous siblings */}
+                  {showContinuationLine && (
+                    <div 
+                      className="absolute bg-slate-300"
+                      style={{ 
+                        left: 9, 
+                        width: 2, 
+                        top: -20, 
+                        bottom: -20
+                      }}
+                    />
+                  )}
+                  
+                  {/* Current level connector */}
+                  {isCurrentLevel && (
+                    <>
+                      {/* Vertical line - full height if has more siblings, half if last */}
+                      <div 
+                        className="absolute bg-slate-300"
+                        style={{ 
+                          left: 9, 
+                          width: 2,
+                          top: -20,
+                          bottom: isLastSibling ? '50%' : -20
+                        }}
+                      />
+                      {/* Horizontal connector */}
+                      <div 
+                        className="absolute bg-slate-300"
+                        style={{ 
+                          left: 9, 
+                          top: '50%', 
+                          width: 10, 
+                          height: 2,
+                          transform: 'translateY(-50%)'
+                        }}
+                      />
+                    </>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
         <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${typeInfo.color} flex-shrink-0`}>

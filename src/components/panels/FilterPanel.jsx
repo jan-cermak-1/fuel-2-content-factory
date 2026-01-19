@@ -1,11 +1,15 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { 
   X, 
   Search, 
   Bookmark, 
   Plus,
   Trash2,
-  Check
+  Check,
+  ChevronDown,
+  Building2,
+  Globe2,
+  Briefcase
 } from 'lucide-react'
 import { useFuel } from '../../context/FuelContext'
 
@@ -23,9 +27,313 @@ const statusOptions = [
   { id: 'released', label: 'Released' },
 ]
 
-const industryOptions = ['Finance', 'Retail', 'Healthcare', 'Tech']
-const regionOptions = ['EMEA', 'NA', 'APAC']
-const jobRoleOptions = ['CMO', 'Social Media Manager', 'Content Creator', 'Analyst', 'PR Manager']
+const industryOptions = [
+  'Advertising & Marketing',
+  'Agriculture',
+  'Automotive',
+  'Banking & Financial Services',
+  'Biotechnology',
+  'Chemicals',
+  'Construction',
+  'Consumer Goods',
+  'Defense & Aerospace',
+  'E-commerce',
+  'Education',
+  'Energy & Utilities',
+  'Entertainment & Media',
+  'Fashion & Apparel',
+  'Food & Beverage',
+  'Gaming',
+  'Government & Public Sector',
+  'Healthcare & Pharmaceuticals',
+  'Hospitality & Tourism',
+  'Insurance',
+  'Legal Services',
+  'Logistics & Transportation',
+  'Manufacturing',
+  'Mining & Metals',
+  'Non-profit & NGO',
+  'Real Estate',
+  'Retail',
+  'Software & Technology',
+  'Sports & Fitness',
+  'Telecommunications',
+]
+
+const regionOptions = [
+  // North America
+  'United States',
+  'Canada',
+  'Mexico',
+  // South America
+  'Brazil',
+  'Argentina',
+  'Colombia',
+  'Chile',
+  'Peru',
+  // Europe
+  'United Kingdom',
+  'Germany',
+  'France',
+  'Italy',
+  'Spain',
+  'Netherlands',
+  'Switzerland',
+  'Sweden',
+  'Poland',
+  'Belgium',
+  'Austria',
+  'Norway',
+  'Denmark',
+  'Finland',
+  'Ireland',
+  'Portugal',
+  'Czech Republic',
+  'Romania',
+  'Greece',
+  // Middle East
+  'United Arab Emirates',
+  'Saudi Arabia',
+  'Israel',
+  'Turkey',
+  'Qatar',
+  'Kuwait',
+  // Africa
+  'South Africa',
+  'Nigeria',
+  'Egypt',
+  'Kenya',
+  'Morocco',
+  // Asia Pacific
+  'China',
+  'Japan',
+  'India',
+  'South Korea',
+  'Australia',
+  'Singapore',
+  'Indonesia',
+  'Malaysia',
+  'Thailand',
+  'Vietnam',
+  'Philippines',
+  'New Zealand',
+  'Hong Kong',
+  'Taiwan',
+]
+
+const jobRoleOptions = [
+  'CMO (Chief Marketing Officer)',
+  'VP of Marketing',
+  'Marketing Director',
+  'Brand Manager',
+  'Social Media Manager',
+  'Content Marketing Manager',
+  'Digital Marketing Manager',
+  'Community Manager',
+  'PR Manager',
+  'Creative Director',
+  'Content Creator',
+  'Marketing Analyst',
+  'Growth Marketing Manager',
+  'Product Marketing Manager',
+  'Influencer Marketing Manager',
+  'Performance Marketing Manager',
+]
+
+// Multi-select dropdown component
+function MultiSelectDropdown({ 
+  label, 
+  icon: Icon, 
+  options, 
+  selected, 
+  onChange, 
+  placeholder,
+  colorClass = 'teal'
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const dropdownRef = useRef(null)
+  
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+  
+  const filteredOptions = options.filter(opt => 
+    opt.toLowerCase().includes(search.toLowerCase())
+  )
+  
+  const toggleOption = (option) => {
+    if (selected.includes(option)) {
+      onChange(selected.filter(s => s !== option))
+    } else {
+      onChange([...selected, option])
+    }
+  }
+  
+  const selectAll = () => {
+    onChange([...options])
+  }
+  
+  const clearAll = () => {
+    onChange([])
+  }
+  
+  const colorClasses = {
+    teal: {
+      badge: 'bg-teal-100 text-teal-700',
+      ring: 'ring-teal-500',
+      check: 'text-teal-600',
+      hover: 'hover:bg-teal-50',
+    },
+    violet: {
+      badge: 'bg-violet-100 text-violet-700',
+      ring: 'ring-violet-500',
+      check: 'text-violet-600',
+      hover: 'hover:bg-violet-50',
+    },
+    blue: {
+      badge: 'bg-blue-100 text-blue-700',
+      ring: 'ring-blue-500',
+      check: 'text-blue-600',
+      hover: 'hover:bg-blue-50',
+    },
+    amber: {
+      badge: 'bg-amber-100 text-amber-700',
+      ring: 'ring-amber-500',
+      check: 'text-amber-600',
+      hover: 'hover:bg-amber-50',
+    },
+  }
+  
+  const colors = colorClasses[colorClass]
+  
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <label className="block text-sm font-medium text-slate-700 mb-2">
+        <span className="flex items-center gap-1.5">
+          {Icon && <Icon className="w-4 h-4 text-slate-400" />}
+          {label}
+        </span>
+      </label>
+      
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex items-center justify-between px-3 py-2 text-sm border rounded-lg bg-white transition-all
+          ${isOpen ? `border-${colorClass}-500 ring-2 ${colors.ring}` : 'border-slate-200 hover:border-slate-300'}
+        `}
+      >
+        <span className={selected.length === 0 ? 'text-slate-400' : 'text-slate-700'}>
+          {selected.length === 0 
+            ? placeholder 
+            : `${selected.length} selected`
+          }
+        </span>
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      
+      {/* Selected tags */}
+      {selected.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {selected.slice(0, 3).map(item => (
+            <span 
+              key={item}
+              className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${colors.badge}`}
+            >
+              {item.length > 20 ? item.substring(0, 20) + '...' : item}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  toggleOption(item)
+                }}
+                className="hover:bg-white/50 rounded-full"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          ))}
+          {selected.length > 3 && (
+            <span className="px-2 py-0.5 text-xs text-slate-500">
+              +{selected.length - 3} more
+            </span>
+          )}
+        </div>
+      )}
+      
+      {/* Dropdown */}
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+          {/* Search */}
+          <div className="p-2 border-b border-slate-100">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search..."
+                className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+          
+          {/* Quick actions */}
+          <div className="flex items-center gap-2 px-2 py-1.5 border-b border-slate-100 bg-slate-50">
+            <button
+              onClick={selectAll}
+              className="text-xs text-teal-600 hover:text-teal-700 font-medium"
+            >
+              Select all
+            </button>
+            <span className="text-slate-300">|</span>
+            <button
+              onClick={clearAll}
+              className="text-xs text-slate-500 hover:text-slate-700"
+            >
+              Clear all
+            </button>
+          </div>
+          
+          {/* Options */}
+          <div className="max-h-48 overflow-y-auto">
+            {filteredOptions.length === 0 ? (
+              <div className="px-3 py-4 text-sm text-slate-500 text-center">
+                No results found
+              </div>
+            ) : (
+              filteredOptions.map(option => {
+                const isSelected = selected.includes(option)
+                return (
+                  <button
+                    key={option}
+                    onClick={() => toggleOption(option)}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors
+                      ${isSelected ? `${colors.badge} ${colors.hover}` : 'hover:bg-slate-50'}
+                    `}
+                  >
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center
+                      ${isSelected ? `${colors.check} border-current bg-current/10` : 'border-slate-300'}
+                    `}>
+                      {isSelected && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <span className={isSelected ? 'font-medium' : ''}>{option}</span>
+                  </button>
+                )
+              })
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function FilterPanel() {
   const { 
@@ -169,65 +477,38 @@ export default function FilterPanel() {
           </div>
         </div>
         
-        {/* Industry */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Industry</label>
-          <div className="flex flex-wrap gap-2">
-            {industryOptions.map((industry) => (
-              <button
-                key={industry}
-                onClick={() => toggleFilter('industries', industry)}
-                className={`px-3 py-1 text-xs font-medium rounded-full transition-colors
-                  ${filters.industries.includes(industry)
-                    ? 'bg-violet-100 text-violet-700 ring-1 ring-violet-300'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-              >
-                {industry}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Industry - Multi-select */}
+        <MultiSelectDropdown
+          label="Industry"
+          icon={Building2}
+          options={industryOptions}
+          selected={filters.industries}
+          onChange={(val) => setFilters(prev => ({ ...prev, industries: val }))}
+          placeholder="Select industries..."
+          colorClass="violet"
+        />
         
-        {/* Region */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Region</label>
-          <div className="flex flex-wrap gap-2">
-            {regionOptions.map((region) => (
-              <button
-                key={region}
-                onClick={() => toggleFilter('regions', region)}
-                className={`px-3 py-1 text-xs font-medium rounded-full transition-colors
-                  ${filters.regions.includes(region)
-                    ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-300'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-              >
-                {region}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Region - Multi-select */}
+        <MultiSelectDropdown
+          label="Region"
+          icon={Globe2}
+          options={regionOptions}
+          selected={filters.regions}
+          onChange={(val) => setFilters(prev => ({ ...prev, regions: val }))}
+          placeholder="Select regions..."
+          colorClass="blue"
+        />
         
-        {/* Job Role */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Job Role</label>
-          <div className="flex flex-wrap gap-2">
-            {jobRoleOptions.map((role) => (
-              <button
-                key={role}
-                onClick={() => toggleFilter('jobRoles', role)}
-                className={`px-3 py-1 text-xs font-medium rounded-full transition-colors
-                  ${filters.jobRoles.includes(role)
-                    ? 'bg-amber-100 text-amber-700 ring-1 ring-amber-300'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-              >
-                {role}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Job Role - Multi-select */}
+        <MultiSelectDropdown
+          label="Job Role"
+          icon={Briefcase}
+          options={jobRoleOptions}
+          selected={filters.jobRoles}
+          onChange={(val) => setFilters(prev => ({ ...prev, jobRoles: val }))}
+          placeholder="Select job roles..."
+          colorClass="amber"
+        />
         
         {/* Quality Score */}
         <div>

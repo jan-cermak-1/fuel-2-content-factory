@@ -121,7 +121,7 @@ export default function TableView() {
         
         {/* Table Header */}
         <div className="bg-white rounded-t-lg border border-slate-200 border-b-0">
-          <div className="grid grid-cols-[40px_1fr_100px_120px_100px_80px_80px_100px_140px] gap-2 px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+          <div className="grid grid-cols-[56px_1fr_100px_120px_100px_80px_80px_100px_140px] gap-2 px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
             <div></div>
             <div>Name</div>
             <div>Impact</div>
@@ -173,17 +173,19 @@ export default function TableView() {
 function HierarchyView({ objectives, items, activeId }) {
   const { expandedIds, toggleExpanded, selectItem } = useFuel()
   
-  const renderItemWithChildren = (item, depth = 0) => {
+  // Render item with tree structure info
+  // connectorLevels: array of booleans indicating which depth levels have continuing vertical lines
+  const renderItemWithChildren = (item, depth = 0, connectorLevels = [], isLastSibling = true) => {
     const children = items.filter(i => item.childIds?.includes(i.id))
     const isExpanded = expandedIds.has(item.id)
     const hasChildren = children.length > 0
     const isDragging = activeId === item.id
     
-    // Determine component type based on item type
-    // - Objectives: only droppable (can receive tactics)
-    // - Tactics: draggable + droppable (can be moved, can receive best practices)
-    // - Best Practices: draggable + droppable (can be moved, can receive steps)
-    // - Steps: only draggable (can be moved, no children)
+    // Tree structure props
+    const treeProps = {
+      connectorLevels,
+      isLastSibling,
+    }
     
     const getRowComponent = () => {
       switch (item.type) {
@@ -196,6 +198,7 @@ function HierarchyView({ objectives, items, activeId }) {
               hasChildren={hasChildren}
               onToggle={() => toggleExpanded(item.id)}
               onSelect={() => selectItem(item.id)}
+              treeProps={treeProps}
             />
           )
         case 'tactic':
@@ -208,6 +211,7 @@ function HierarchyView({ objectives, items, activeId }) {
               hasChildren={hasChildren}
               onToggle={() => toggleExpanded(item.id)}
               onSelect={() => selectItem(item.id)}
+              treeProps={treeProps}
             />
           )
         case 'step':
@@ -220,17 +224,31 @@ function HierarchyView({ objectives, items, activeId }) {
               hasChildren={hasChildren}
               onToggle={() => toggleExpanded(item.id)}
               onSelect={() => selectItem(item.id)}
+              treeProps={treeProps}
             />
           )
       }
     }
+    
+    // Calculate connector levels for children
+    // If this item is not the last sibling, add a connector at current depth
+    const childConnectorLevels = [...connectorLevels]
+    if (depth > 0) {
+      // At the current depth, if we're not the last sibling, we need a vertical line
+      childConnectorLevels[depth - 1] = !isLastSibling
+    }
+    // Add a new level for children (will be set per-child based on their position)
+    childConnectorLevels[depth] = true
     
     return (
       <div key={item.id} className={isDragging ? 'opacity-30' : ''}>
         {getRowComponent()}
         {isExpanded && hasChildren && (
           <div>
-            {children.map(child => renderItemWithChildren(child, depth + 1))}
+            {children.map((child, index) => {
+              const isLast = index === children.length - 1
+              return renderItemWithChildren(child, depth + 1, childConnectorLevels, isLast)
+            })}
           </div>
         )}
       </div>
@@ -247,7 +265,7 @@ function HierarchyView({ objectives, items, activeId }) {
   
   return (
     <div>
-      {objectives.map(obj => renderItemWithChildren(obj, 0))}
+      {objectives.map((obj, index) => renderItemWithChildren(obj, 0, [], index === objectives.length - 1))}
     </div>
   )
 }
