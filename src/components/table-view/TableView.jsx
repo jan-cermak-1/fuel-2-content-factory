@@ -210,7 +210,10 @@ function HierarchyView({ objectives, items, activeId }) {
   // Render item with tree structure info
   // connectorLevels: array of booleans indicating which depth levels have continuing vertical lines
   const renderItemWithChildren = (item, depth = 0, connectorLevels = [], isLastSibling = true) => {
-    const children = items.filter(i => item.childIds?.includes(i.id))
+    // Get children in the order specified by childIds (important for reordering!)
+    const children = (item.childIds || [])
+      .map(childId => items.find(i => i.id === childId))
+      .filter(Boolean)
     const isExpanded = expandedIds.has(item.id)
     const hasChildren = children.length > 0
     const isDragging = activeId === item.id

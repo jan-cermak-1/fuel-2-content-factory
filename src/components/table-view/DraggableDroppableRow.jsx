@@ -1,8 +1,13 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core'
+import { useDndContext } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import HierarchyRow from './HierarchyRow'
 
 export default function DraggableDroppableRow({ item, ...props }) {
+  // Get global drag state to know when ANY item is being dragged
+  const { active } = useDndContext()
+  const isSomethingDragging = !!active
+  
   // Draggable functionality
   const {
     attributes,
@@ -41,15 +46,19 @@ export default function DraggableDroppableRow({ item, ...props }) {
     setChildDropRef(node)
   }
   
+  // Only show drop zones when something is being dragged (but not this item itself)
+  const showDropZones = isSomethingDragging && !isDragging
+  
   return (
     <div className="relative">
-      {/* Drop indicator BEFORE - visible line when hovering top half */}
-      <div 
-        ref={setBeforeDropRef}
-        className="absolute top-0 left-0 right-0 h-1/2 z-10"
-        style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
-      />
-      {isOverBefore && !isDragging && (
+      {/* Drop indicator BEFORE - only active when dragging */}
+      {showDropZones && (
+        <div 
+          ref={setBeforeDropRef}
+          className="absolute top-0 left-0 right-0 h-1/2 z-10"
+        />
+      )}
+      {isOverBefore && showDropZones && (
         <div className="absolute top-0 left-4 right-4 h-0.5 bg-teal-500 z-20 rounded-full shadow-lg shadow-teal-500/50" />
       )}
       
@@ -68,13 +77,14 @@ export default function DraggableDroppableRow({ item, ...props }) {
         />
       </div>
       
-      {/* Drop indicator AFTER - visible line when hovering bottom half */}
-      <div 
-        ref={setAfterDropRef}
-        className="absolute bottom-0 left-0 right-0 h-1/2 z-10"
-        style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
-      />
-      {isOverAfter && !isDragging && (
+      {/* Drop indicator AFTER - only active when dragging */}
+      {showDropZones && (
+        <div 
+          ref={setAfterDropRef}
+          className="absolute bottom-0 left-0 right-0 h-1/2 z-10"
+        />
+      )}
+      {isOverAfter && showDropZones && (
         <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-teal-500 z-20 rounded-full shadow-lg shadow-teal-500/50" />
       )}
     </div>
