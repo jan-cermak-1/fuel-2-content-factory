@@ -66,16 +66,19 @@ export default function ReviewStep({ data, updateData, onClose }) {
   const [createdItems, setCreatedItems] = useState([])
   const [expandedItems, setExpandedItems] = useState(new Set(['main']))
   const [editingItem, setEditingItem] = useState(null)
+  const [editForm, setEditForm] = useState({ name: '', description: '' })
   
   const config = typeConfig[data.type]
   const Icon = config?.icon || Layers
   
-  // Get all items to create
+  // Get all items to create - use state for editable items
+  const [editedItems, setEditedItems] = useState({})
+  
   const mainItem = {
     id: 'main',
     type: data.type,
-    name: data.name || data.generatedContent?.name || 'Unnamed Item',
-    description: data.description || data.generatedContent?.description || '',
+    name: editedItems['main']?.name ?? data.name ?? data.generatedContent?.name ?? 'Unnamed Item',
+    description: editedItems['main']?.description ?? data.description ?? data.generatedContent?.description ?? '',
     isMain: true,
     settings: data.generatedContent?.settings,
     contentOutline: data.generatedContent?.contentOutline,
@@ -85,9 +88,41 @@ export default function ReviewStep({ data, updateData, onClose }) {
     ...v,
     type: data.type,
     isVariant: true,
+    name: editedItems[v.id]?.name ?? v.name,
+    description: editedItems[v.id]?.description ?? v.description,
   }))
   
   const allItems = [mainItem, ...variantItems]
+  
+  // Start editing an item
+  const startEditing = (item) => {
+    setEditingItem(item.id)
+    setEditForm({ name: item.name, description: item.description })
+    setExpandedItems(prev => new Set([...prev, item.id]))
+  }
+  
+  // Save edits
+  const saveEdits = () => {
+    if (editingItem) {
+      setEditedItems(prev => ({
+        ...prev,
+        [editingItem]: { name: editForm.name, description: editForm.description }
+      }))
+      
+      // If editing main item, also update the wizard data
+      if (editingItem === 'main') {
+        updateData({ name: editForm.name, description: editForm.description })
+      }
+      
+      setEditingItem(null)
+    }
+  }
+  
+  // Cancel editing
+  const cancelEditing = () => {
+    setEditingItem(null)
+    setEditForm({ name: '', description: '' })
+  }
   
   // Suggested children from AI
   const suggestedChildren = data.generatedContent?.suggestedTactics 
@@ -206,6 +241,7 @@ export default function ReviewStep({ data, updateData, onClose }) {
     const ItemIcon = itemConfig?.icon || Layers
     const isExpanded = expandedItems.has(item.id)
     const isCreated = createdItems.some(c => c.originalId === item.id)
+    const isEditing = editingItem === item.id
     
     return (
       <motion.div
@@ -216,22 +252,28 @@ export default function ReviewStep({ data, updateData, onClose }) {
         className={`border rounded-xl overflow-hidden transition-all
           ${isCreated 
             ? 'border-emerald-300 bg-emerald-50' 
-            : 'border-slate-200 bg-white'
+            : isEditing
+              ? 'border-teal-400 bg-teal-50 ring-2 ring-teal-200'
+              : 'border-slate-200 bg-white'
           }`}
       >
         <button
-          onClick={() => toggleItemExpanded(item.id)}
-          className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors"
+          onClick={() => !isEditing && toggleItemExpanded(item.id)}
+          className={`w-full flex items-center gap-3 p-4 transition-colors ${isEditing ? 'cursor-default' : 'hover:bg-slate-50'}`}
         >
           {/* Status indicator */}
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center
             ${isCreated 
               ? 'bg-emerald-200' 
-              : itemConfig?.iconBg || 'bg-slate-100'
+              : isEditing
+                ? 'bg-teal-200'
+                : itemConfig?.iconBg || 'bg-slate-100'
             }`}
           >
             {isCreated ? (
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            ) : isEditing ? (
+              <Edit3 className="w-4 h-4 text-teal-600" />
             ) : (
               <ItemIcon className={`w-4 h-4 ${itemConfig?.iconText || 'text-slate-600'}`} />
             )}
@@ -248,6 +290,9 @@ export default function ReviewStep({ data, updateData, onClose }) {
                   Variant
                 </span>
               )}
+              {isEditing && (
+                <span className="px-1.5 py-0.5 text-xs bg-teal-200 text-teal-700 rounded">Editing</span>
+              )}
             </div>
             <p className="text-xs text-slate-500">
               {itemConfig?.label} • {item.targeting?.industries?.[0] || item.targeting?.regions?.[0] || item.targeting?.jobRoles?.[0] || 'All segments'}
@@ -255,27 +300,29 @@ export default function ReviewStep({ data, updateData, onClose }) {
           </div>
           
           <div className="flex items-center gap-2">
-            {!isCreated && (
+            {!isCreated && !isEditing && (
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  setEditingItem(item.id)
+                  startEditing(item)
                 }}
                 className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors"
               >
                 <Edit3 className="w-4 h-4 text-slate-400" />
               </button>
             )}
-            {isExpanded ? (
-              <ChevronDown className="w-5 h-5 text-slate-400" />
-            ) : (
-              <ChevronRight className="w-5 h-5 text-slate-400" />
+            {!isEditing && (
+              isExpanded ? (
+                <ChevronDown className="w-5 h-5 text-slate-400" />
+              ) : (
+                <ChevronRight className="w-5 h-5 text-slate-400" />
+              )
             )}
           </div>
         </button>
         
         <AnimatePresence>
-          {isExpanded && (
+          {(isExpanded || isEditing) && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
@@ -283,36 +330,76 @@ export default function ReviewStep({ data, updateData, onClose }) {
               className="overflow-hidden"
             >
               <div className="px-4 pb-4 border-t border-slate-100">
-                <div className="mt-3 space-y-3">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Description</label>
-                    <p className="text-sm text-slate-700">{item.description || 'No description'}</p>
+                {isEditing ? (
+                  // Edit form
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">Name</label>
+                      <input
+                        type="text"
+                        value={editForm.name}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+                        autoFocus
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">Description</label>
+                      <textarea
+                        value={editForm.description}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                        rows={3}
+                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white resize-none"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button
+                        onClick={cancelEditing}
+                        className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={saveEdits}
+                        className="px-3 py-1.5 text-sm font-medium bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+                      >
+                        Save changes
+                      </button>
+                    </div>
                   </div>
-                  
-                  {item.settings && (
-                    <div className="p-3 bg-violet-50 rounded-lg text-xs space-y-1">
-                      <div><span className="font-medium text-violet-700">Metrics:</span> {item.settings.metrics?.join(', ')}</div>
-                      <div><span className="font-medium text-violet-700">Baseline → Target:</span> {item.settings.baseline} → {item.settings.target}</div>
+                ) : (
+                  // View mode
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-slate-500 mb-1">Description</label>
+                      <p className="text-sm text-slate-700">{item.description || 'No description'}</p>
                     </div>
-                  )}
-                  
-                  {item.targeting && Object.values(item.targeting).some(v => v?.length > 0 && v[0] !== 'all') && (
-                    <div className="p-3 bg-slate-50 rounded-lg">
-                      <label className="block text-xs font-medium text-slate-500 mb-2">Targeting</label>
-                      <div className="flex flex-wrap gap-1.5">
-                        {item.targeting.industries?.map((ind, i) => (
-                          <span key={i} className="px-2 py-0.5 text-xs bg-violet-100 text-violet-700 rounded-full">{ind}</span>
-                        ))}
-                        {item.targeting.regions?.map((reg, i) => (
-                          <span key={i} className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">{reg}</span>
-                        ))}
-                        {item.targeting.jobRoles?.map((role, i) => (
-                          <span key={i} className="px-2 py-0.5 text-xs bg-emerald-100 text-emerald-700 rounded-full">{role}</span>
-                        ))}
+                    
+                    {item.settings && (
+                      <div className="p-3 bg-violet-50 rounded-lg text-xs space-y-1">
+                        <div><span className="font-medium text-violet-700">Metrics:</span> {item.settings.metrics?.join(', ')}</div>
+                        <div><span className="font-medium text-violet-700">Baseline → Target:</span> {item.settings.baseline} → {item.settings.target}</div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                    
+                    {item.targeting && Object.values(item.targeting).some(v => v?.length > 0 && v[0] !== 'all') && (
+                      <div className="p-3 bg-slate-50 rounded-lg">
+                        <label className="block text-xs font-medium text-slate-500 mb-2">Targeting</label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {item.targeting.industries?.map((ind, i) => (
+                            <span key={i} className="px-2 py-0.5 text-xs bg-violet-100 text-violet-700 rounded-full">{ind}</span>
+                          ))}
+                          {item.targeting.regions?.map((reg, i) => (
+                            <span key={i} className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">{reg}</span>
+                          ))}
+                          {item.targeting.jobRoles?.map((role, i) => (
+                            <span key={i} className="px-2 py-0.5 text-xs bg-emerald-100 text-emerald-700 rounded-full">{role}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

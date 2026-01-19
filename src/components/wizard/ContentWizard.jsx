@@ -1,17 +1,15 @@
 import { useState, useCallback } from 'react'
-import { X, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Sparkles, Zap } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import WizardStepIndicator from './WizardStepIndicator'
 import TypeSelectionStep from './steps/TypeSelectionStep'
-import BasicInfoStep from './steps/BasicInfoStep'
-import AIGenerationStep from './steps/AIGenerationStep'
+import ContentStep from './steps/ContentStep'
 import VariantsStep from './steps/VariantsStep'
 import ReviewStep from './steps/ReviewStep'
 
 const STEPS = [
   { id: 'type', label: 'Type', description: 'Choose what to create' },
-  { id: 'info', label: 'Basic Info', description: 'Name and description' },
-  { id: 'ai', label: 'AI Generation', description: 'Let AI create content' },
+  { id: 'content', label: 'Content', description: 'Define with AI assistance' },
   { id: 'variants', label: 'Variants', description: 'Customize for segments' },
   { id: 'review', label: 'Review', description: 'Review and save' },
 ]
@@ -20,13 +18,11 @@ const initialWizardData = {
   // Step 1: Type
   type: 'tactic',
   
-  // Step 2: Basic Info
+  // Step 2: Content (combined Basic Info + AI Generation)
   name: '',
   description: '',
   parentId: '',
   status: 'draft',
-  
-  // Step 3: AI Generation
   prompt: '',
   generatedContent: null,
   
@@ -42,13 +38,16 @@ const initialWizardData = {
   contentStructure: '',
   includeMedia: { images: true, videos: false, tables: true },
   
-  // Step 4: Variants
+  // Step-specific
+  stepType: 'action',
+  
+  // Step 3: Variants
   generateVariants: false,
   variantBy: null, // 'industry' | 'region' | 'jobRole'
   selectedVariants: [],
   generatedVariants: [],
   
-  // Step 5: Review
+  // Step 4: Review
   includeChildren: true,
   childCount: 3,
 }
@@ -66,17 +65,22 @@ export default function ContentWizard({ isOpen, onClose }) {
     switch (currentStep) {
       case 0: // Type selection
         return !!wizardData.type
-      case 1: // Basic info
+      case 1: // Content (name required)
         return wizardData.name.trim().length > 0
-      case 2: // AI Generation
-        return true // Can skip AI generation
-      case 3: // Variants
-        return true // Can skip variants
-      case 4: // Review
+      case 2: // Variants (optional)
+        return true
+      case 3: // Review
         return true
       default:
         return true
     }
+  }
+  
+  // Check if user can quick-create (skip variants)
+  const canQuickCreate = () => {
+    return currentStep === 1 && 
+           wizardData.name.trim().length > 0 && 
+           !isGenerating
   }
   
   const handleNext = () => {
@@ -97,6 +101,11 @@ export default function ContentWizard({ isOpen, onClose }) {
     }
   }
   
+  const handleQuickCreate = () => {
+    // Skip variants and go directly to review
+    setCurrentStep(STEPS.length - 1)
+  }
+  
   const handleClose = () => {
     setCurrentStep(0)
     setWizardData(initialWizardData)
@@ -106,7 +115,7 @@ export default function ContentWizard({ isOpen, onClose }) {
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       handleClose()
-    } else if (e.key === 'Enter' && !e.shiftKey && canProceed()) {
+    } else if (e.key === 'Enter' && !e.shiftKey && canProceed() && !isGenerating) {
       e.preventDefault()
       handleNext()
     }
@@ -123,21 +132,14 @@ export default function ContentWizard({ isOpen, onClose }) {
         )
       case 1:
         return (
-          <BasicInfoStep
-            data={wizardData}
-            updateData={updateWizardData}
-          />
-        )
-      case 2:
-        return (
-          <AIGenerationStep
+          <ContentStep
             data={wizardData}
             updateData={updateWizardData}
             isGenerating={isGenerating}
             setIsGenerating={setIsGenerating}
           />
         )
-      case 3:
+      case 2:
         return (
           <VariantsStep
             data={wizardData}
@@ -146,7 +148,7 @@ export default function ContentWizard({ isOpen, onClose }) {
             setIsGenerating={setIsGenerating}
           />
         )
-      case 4:
+      case 3:
         return (
           <ReviewStep
             data={wizardData}
@@ -256,12 +258,24 @@ export default function ContentWizard({ isOpen, onClose }) {
             </button>
             
             <div className="flex items-center gap-3">
-              {currentStep > 1 && currentStep < 4 && (
+              {/* Quick Create button (skip variants) */}
+              {canQuickCreate() && (
+                <button
+                  onClick={handleQuickCreate}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                >
+                  <Zap className="w-4 h-4" />
+                  Quick Create
+                </button>
+              )}
+              
+              {/* Skip button for Variants step */}
+              {currentStep === 2 && (
                 <button
                   onClick={handleSkip}
                   className="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
                 >
-                  Skip
+                  Skip variants
                 </button>
               )}
               
