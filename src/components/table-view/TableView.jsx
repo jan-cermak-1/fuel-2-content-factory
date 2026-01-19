@@ -51,15 +51,27 @@ export default function TableView() {
     if (over && active.id !== over.id) {
       const draggedItem = items.find(i => i.id === active.id)
       let targetId = over.id
+      let position = 'after' // default position for reorder
       
-      // Handle dropzone prefix
+      // Handle dropzone prefix (for parent-child drops)
       if (targetId.startsWith('dropzone-')) {
         targetId = targetId.replace('dropzone-', '')
       }
       
-      // Handle reorder prefix (sibling reordering)
-      const isReorder = targetId.startsWith('reorder-')
-      if (isReorder) {
+      // Handle reorder-before prefix (sibling reordering - insert before)
+      if (targetId.startsWith('reorder-before-')) {
+        targetId = targetId.replace('reorder-before-', '')
+        position = 'before'
+      }
+      
+      // Handle reorder-after prefix (sibling reordering - insert after)
+      if (targetId.startsWith('reorder-after-')) {
+        targetId = targetId.replace('reorder-after-', '')
+        position = 'after'
+      }
+      
+      // Legacy reorder prefix
+      if (targetId.startsWith('reorder-')) {
         targetId = targetId.replace('reorder-', '')
       }
       
@@ -67,7 +79,7 @@ export default function TableView() {
       
       if (draggedItem && targetItem) {
         // Check if this is a sibling reorder (same type, same parent)
-        if (draggedItem.type === targetItem.type) {
+        if (draggedItem.type === targetItem.type && draggedItem.id !== targetItem.id) {
           // Find if they share a common parent
           const commonParentId = draggedItem.parentIds?.find(pid => 
             targetItem.parentIds?.includes(pid)
@@ -75,7 +87,7 @@ export default function TableView() {
           
           if (commonParentId) {
             // Reorder within parent - no confirmation needed
-            reorderChildInParent(draggedItem.id, targetItem.id, 'after')
+            reorderChildInParent(draggedItem.id, targetItem.id, position)
             setActiveId(null)
             setActiveItem(null)
             return

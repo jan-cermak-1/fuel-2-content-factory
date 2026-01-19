@@ -241,16 +241,20 @@ export function FuelProvider({ children }) {
           const toIndex = childIds.indexOf(targetSiblingId)
           
           if (fromIndex === -1 || toIndex === -1) return item
+          if (fromIndex === toIndex) return item
           
           // Remove from current position
           childIds.splice(fromIndex, 1)
           
-          // Insert at new position
-          const insertIndex = position === 'after' 
-            ? (fromIndex < toIndex ? toIndex : toIndex + 1)
-            : (fromIndex < toIndex ? toIndex - 1 : toIndex)
+          // Calculate new index after removal
+          let newToIndex = childIds.indexOf(targetSiblingId)
           
-          childIds.splice(Math.max(0, insertIndex), 0, itemId)
+          // Insert before or after target
+          if (position === 'before') {
+            childIds.splice(newToIndex, 0, itemId)
+          } else {
+            childIds.splice(newToIndex + 1, 0, itemId)
+          }
           
           return { ...item, childIds }
         }
