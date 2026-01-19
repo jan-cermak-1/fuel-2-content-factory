@@ -7,7 +7,7 @@ const typeConfig = {
   objective: {
     label: 'Objective',
     icon: Target,
-    color: 'violet',
+    badgeClass: 'bg-violet-100 text-violet-700',
     namePlaceholder: 'e.g. Increase Brand Awareness by 25%',
     descPlaceholder: 'Describe the main goal and why it matters for your strategy...',
     parentType: null,
@@ -24,7 +24,7 @@ const typeConfig = {
   tactic: {
     label: 'Tactic',
     icon: Layers,
-    color: 'blue',
+    badgeClass: 'bg-blue-100 text-blue-700',
     namePlaceholder: 'e.g. Influencer Marketing Campaign',
     descPlaceholder: 'Describe the tactic and how it helps achieve the goal...',
     parentType: 'objective',
@@ -42,7 +42,7 @@ const typeConfig = {
   bestPractice: {
     label: 'Best Practice',
     icon: BookOpen,
-    color: 'emerald',
+    badgeClass: 'bg-emerald-100 text-emerald-700',
     namePlaceholder: 'e.g. Micro-influencer Vetting Process',
     descPlaceholder: 'Describe the best practice and when to use it...',
     parentType: 'tactic',
@@ -60,7 +60,7 @@ const typeConfig = {
   step: {
     label: 'Step',
     icon: ListChecks,
-    color: 'slate',
+    badgeClass: 'bg-slate-100 text-slate-700',
     namePlaceholder: 'e.g. Set up UTM parameters',
     descPlaceholder: 'Describe the specific step or action...',
     parentType: 'bestPractice',
@@ -84,11 +84,11 @@ export default function BasicInfoStep({ data, updateData }) {
   const [generatedSuggestions, setGeneratedSuggestions] = useState(null)
   const [selectedSuggestion, setSelectedSuggestion] = useState(null)
   
-  const config = typeConfig[data.type]
-  const Icon = config?.icon || Layers
+  const config = typeConfig[data.type] || typeConfig.tactic
+  const Icon = config.icon
   
   // Get possible parents based on type
-  const possibleParents = config?.parentType 
+  const possibleParents = config.parentType 
     ? items.filter(item => item.type === config.parentType)
     : []
   
@@ -110,19 +110,21 @@ export default function BasicInfoStep({ data, updateData }) {
   const generateSuggestions = (prompt, type) => {
     // Simulate AI-generated suggestions based on the prompt
     const baseWords = prompt.toLowerCase().split(' ').filter(w => w.length > 3)
+    const firstWord = baseWords[0] || 'engagement'
+    const secondWord = baseWords[1] || 'campaign'
     
     const templates = {
       objective: [
         {
-          name: `Increase ${baseWords[0] || 'engagement'} by 30% in Q1`,
+          name: `Increase ${firstWord} by 30% in Q1`,
           description: `Strategic objective to boost ${prompt.toLowerCase()}. This initiative focuses on measurable outcomes through targeted social media campaigns, aiming to achieve significant growth in key performance metrics.`,
         },
         {
-          name: `Build ${baseWords[0] || 'brand'} awareness in target market`,
+          name: `Build ${firstWord} awareness in target market`,
           description: `Comprehensive goal to expand reach and visibility based on ${prompt.toLowerCase()}. This objective will track brand mentions, share of voice, and audience growth metrics.`,
         },
         {
-          name: `Optimize ${baseWords[0] || 'social'} performance metrics`,
+          name: `Optimize ${firstWord} performance metrics`,
           description: `Data-driven objective to improve overall performance related to ${prompt.toLowerCase()}. Focus on conversion rates, engagement quality, and ROI optimization.`,
         },
       ],
@@ -132,11 +134,11 @@ export default function BasicInfoStep({ data, updateData }) {
           description: `Tactical approach to ${prompt.toLowerCase()}. This strategy outlines specific channels, content types, and timeline for execution with clear success metrics.`,
         },
         {
-          name: `Strategic ${baseWords[0] || 'content'} initiative`,
+          name: `Strategic ${firstWord} initiative`,
           description: `Focused tactic implementing ${prompt.toLowerCase()}. Includes audience targeting, content calendar, and engagement protocols.`,
         },
         {
-          name: `${baseWords[0] || 'Social'} optimization program`,
+          name: `${firstWord} optimization program`,
           description: `Systematic approach to ${prompt.toLowerCase()}. Combines organic and paid strategies with continuous testing and optimization.`,
         },
       ],
@@ -146,25 +148,25 @@ export default function BasicInfoStep({ data, updateData }) {
           description: `Step-by-step best practice for ${prompt.toLowerCase()}. Based on industry standards and proven methodologies for consistent results.`,
         },
         {
-          name: `${baseWords[0] || 'Process'} optimization checklist`,
+          name: `${firstWord} optimization checklist`,
           description: `Comprehensive checklist for ${prompt.toLowerCase()}. Ensures quality and consistency across all implementations.`,
         },
         {
-          name: `${baseWords[0] || 'Standard'} operating procedure`,
+          name: `${firstWord} operating procedure`,
           description: `Documented procedure for ${prompt.toLowerCase()}. Includes templates, examples, and verification criteria.`,
         },
       ],
       step: [
         {
-          name: `Configure ${baseWords[0] || 'settings'} for ${baseWords[1] || 'campaign'}`,
+          name: `Configure ${firstWord} for ${secondWord}`,
           description: `Action item: ${prompt}. Specific instructions with verification steps to ensure completion.`,
         },
         {
-          name: `Set up ${baseWords[0] || 'tracking'} parameters`,
+          name: `Set up ${firstWord} parameters`,
           description: `Technical step to implement ${prompt.toLowerCase()}. Includes links to documentation and expected outcomes.`,
         },
         {
-          name: `Review and validate ${baseWords[0] || 'results'}`,
+          name: `Review and validate ${firstWord}`,
           description: `Quality check step for ${prompt.toLowerCase()}. Verification criteria and approval workflow.`,
         },
       ],
@@ -182,6 +184,7 @@ export default function BasicInfoStep({ data, updateData }) {
   }
   
   const handleQuickPrompt = (prompt) => {
+    setAiPrompt(prompt)
     handleGenerateFromPrompt(prompt)
   }
   
@@ -189,15 +192,15 @@ export default function BasicInfoStep({ data, updateData }) {
     <div className="p-8 max-w-3xl mx-auto">
       {/* Type indicator */}
       <div className="flex items-center justify-between mb-6">
-        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-${config?.color || 'slate'}-100 text-${config?.color || 'slate'}-700`}>
+        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${config.badgeClass}`}>
           <Icon className="w-4 h-4" />
-          <span className="text-sm font-medium">{config?.label}</span>
+          <span className="text-sm font-medium">{config.label}</span>
         </div>
         
         {/* Parent Selection */}
-        {config?.parentType && possibleParents.length > 0 && (
+        {config.parentType && possibleParents.length > 0 && (
           <select
-            value={data.parentId}
+            value={data.parentId || ''}
             onChange={(e) => updateData({ parentId: e.target.value })}
             className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-slate-700"
           >
@@ -220,9 +223,9 @@ export default function BasicInfoStep({ data, updateData }) {
           <textarea
             value={aiPrompt}
             onChange={(e) => setAiPrompt(e.target.value)}
-            placeholder={config?.promptPlaceholder}
+            placeholder={config.promptPlaceholder}
             rows={3}
-            className="w-full px-4 py-3 pr-28 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-slate-900 placeholder:text-slate-400 resize-none"
+            className="w-full px-4 py-3 pr-32 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-slate-900 placeholder:text-slate-400 resize-none"
           />
           <button
             onClick={() => handleGenerateFromPrompt(aiPrompt)}
@@ -252,7 +255,7 @@ export default function BasicInfoStep({ data, updateData }) {
             <span className="text-sm font-medium text-slate-700">Or pick a quick start:</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {config?.quickPrompts.map((prompt, index) => (
+            {config.quickPrompts.map((prompt, index) => (
               <button
                 key={index}
                 onClick={() => handleQuickPrompt(prompt)}
@@ -269,6 +272,7 @@ export default function BasicInfoStep({ data, updateData }) {
       <AnimatePresence mode="wait">
         {isGenerating && (
           <motion.div
+            key="loading"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -286,6 +290,7 @@ export default function BasicInfoStep({ data, updateData }) {
         
         {generatedSuggestions && !isGenerating && (
           <motion.div
+            key="suggestions"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -371,9 +376,9 @@ export default function BasicInfoStep({ data, updateData }) {
           </label>
           <input
             type="text"
-            value={data.name}
+            value={data.name || ''}
             onChange={(e) => updateData({ name: e.target.value })}
-            placeholder={config?.namePlaceholder}
+            placeholder={config.namePlaceholder}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-slate-900 placeholder:text-slate-400 text-sm"
           />
         </div>
@@ -384,9 +389,9 @@ export default function BasicInfoStep({ data, updateData }) {
             Description
           </label>
           <textarea
-            value={data.description}
+            value={data.description || ''}
             onChange={(e) => updateData({ description: e.target.value })}
-            placeholder={config?.descPlaceholder}
+            placeholder={config.descPlaceholder}
             rows={3}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-slate-900 placeholder:text-slate-400 resize-none text-sm"
           />

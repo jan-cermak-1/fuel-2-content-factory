@@ -90,25 +90,15 @@ export default function HierarchyRow({
       }}
     >
       {/* Expand/Collapse + Drag Handle */}
-      <div style={{ paddingLeft: indent }} className="flex items-center gap-1">
-        {/* Drag Handle */}
-        {canDrag && dragHandleProps && (
-          <button
-            {...dragHandleProps}
-            className="p-1 text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <GripVertical className="w-4 h-4" />
-          </button>
-        )}
-        
+      <div className="flex items-center">
+        {/* Expand/collapse button - always at left edge */}
         {hasChildren ? (
           <button
             onClick={(e) => {
               e.stopPropagation()
               onToggle()
             }}
-            className="p-1 hover:bg-slate-200 rounded transition-colors"
+            className="p-1 hover:bg-slate-200 rounded transition-colors flex-shrink-0"
           >
             <motion.div
               animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -118,7 +108,21 @@ export default function HierarchyRow({
             </motion.div>
           </button>
         ) : (
-          <div className="w-6" />
+          <div className="w-6 flex-shrink-0" />
+        )}
+        
+        {/* Indent spacer - visual hierarchy indicator */}
+        {depth > 0 && <div style={{ width: (depth - 1) * 16 + 8 }} className="flex-shrink-0" />}
+        
+        {/* Drag Handle - only for draggable items */}
+        {canDrag && dragHandleProps && (
+          <button
+            {...dragHandleProps}
+            className="p-0.5 text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical className="w-3 h-3" />
+          </button>
         )}
       </div>
       
