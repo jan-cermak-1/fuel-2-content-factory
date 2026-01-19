@@ -92,18 +92,18 @@ export default function HierarchyRow({
       }}
     >
       {/* Expand/Collapse + Drag Handle */}
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-0">
         {/* Drag Handle - visible for draggable items, shown first */}
         {canDrag && dragHandleProps ? (
           <button
             {...dragHandleProps}
-            className="p-1 text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing transition-colors flex-shrink-0"
+            className="p-2 -m-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded cursor-grab active:cursor-grabbing transition-colors flex-shrink-0"
             onClick={(e) => e.stopPropagation()}
           >
             <GripVertical className="w-4 h-4" />
           </button>
         ) : (
-          <div className="w-6 flex-shrink-0" />
+          <div className="w-7 flex-shrink-0" />
         )}
         
         {/* Expand/collapse button */}
@@ -113,7 +113,7 @@ export default function HierarchyRow({
               e.stopPropagation()
               onToggle()
             }}
-            className="p-1 hover:bg-slate-200 rounded transition-colors flex-shrink-0"
+            className="p-2 -m-1 hover:bg-slate-200 rounded transition-colors flex-shrink-0"
           >
             <motion.div
               animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -123,7 +123,7 @@ export default function HierarchyRow({
             </motion.div>
           </button>
         ) : (
-          <div className="w-6 flex-shrink-0" />
+          <div className="w-7 flex-shrink-0" />
         )}
       </div>
       

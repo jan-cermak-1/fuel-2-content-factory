@@ -91,6 +91,32 @@ export default function TableView() {
             setActiveId(null)
             setActiveItem(null)
             return
+          } else {
+            // Same type but different parent - move to target's parent with confirmation
+            // Find the target's parent that can accept this item type
+            const parentTypeMap = {
+              'tactic': 'objective',
+              'bestPractice': 'tactic',
+              'step': 'bestPractice',
+            }
+            const neededParentType = parentTypeMap[draggedItem.type]
+            
+            if (neededParentType && targetItem.parentIds?.length > 0) {
+              const targetParent = items.find(i => 
+                targetItem.parentIds.includes(i.id) && i.type === neededParentType
+              )
+              
+              if (targetParent) {
+                setDragConfirm({
+                  isOpen: true,
+                  item: draggedItem,
+                  targetParent: targetParent,
+                })
+                setActiveId(null)
+                setActiveItem(null)
+                return
+              }
+            }
           }
         }
         
