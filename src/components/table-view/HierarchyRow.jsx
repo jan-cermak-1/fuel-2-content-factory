@@ -124,14 +124,6 @@ export default function HierarchyRow({
       
       {/* Name with type badge */}
       <div className="flex items-center gap-2 min-w-0">
-        {/* Vertical line for hierarchy */}
-        {depth > 0 && (
-          <div 
-            className="absolute left-0 top-0 bottom-0 border-l border-slate-200"
-            style={{ left: 16 + (depth - 1) * 24 + 12 }}
-          />
-        )}
-        
         <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${typeInfo.color} flex-shrink-0`}>
           {typeInfo.label}
         </span>
