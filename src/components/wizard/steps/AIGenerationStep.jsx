@@ -61,11 +61,11 @@ const contentStructures = [
 ]
 
 const stepTypes = [
-  { id: 'action', label: 'Manuální akce', icon: Check },
-  { id: 'documentation', label: 'Dokumentace', icon: FileText },
+  { id: 'action', label: 'Manual action', icon: Check },
+  { id: 'documentation', label: 'Documentation', icon: FileText },
   { id: 'script', label: 'Script/Code', icon: Play },
-  { id: 'automation', label: 'Automatizace', icon: Zap },
-  { id: 'link', label: 'Externí link', icon: Link2 },
+  { id: 'automation', label: 'Automation', icon: Zap },
+  { id: 'link', label: 'External link', icon: Link2 },
 ]
 
 const typeConfig = {
@@ -260,7 +260,7 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
                 type="text"
                 value={data.baseline || ''}
                 onChange={(e) => updateData({ baseline: e.target.value })}
-                placeholder="např. 2.5%"
+                placeholder="e.g. 2.5%"
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white"
               />
             </div>
@@ -455,16 +455,16 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
       {/* Prompt input */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-slate-700 mb-2">
-          Popiš co chceš vygenerovat:
+          Describe what you want to generate:
         </label>
         <textarea
           value={data.prompt || ''}
           onChange={(e) => updateData({ prompt: e.target.value })}
           placeholder={
-            data.type === 'objective' ? 'např. Zvýšit engagement na Instagramu o 30% do konce Q4...' :
-            data.type === 'tactic' ? 'např. Influencer marketing kampaň pro launch nového produktu...' :
-            data.type === 'bestPractice' ? 'např. Proces schvalování obsahu pro social media tým...' :
-            'např. Nastavit automatické alerty pro zmínky značky...'
+            data.type === 'objective' ? 'e.g. Increase Instagram engagement by 30% by end of Q4...' :
+            data.type === 'tactic' ? 'e.g. Influencer marketing campaign for new product launch...' :
+            data.type === 'bestPractice' ? 'e.g. Content approval process for social media team...' :
+            'e.g. Set up automatic alerts for brand mentions...'
           }
           rows={3}
           className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-slate-900 placeholder:text-slate-400 resize-none"
@@ -477,7 +477,7 @@ export default function AIGenerationStep({ data, updateData, isGenerating, setIs
           onClick={() => toggleSection('settings')}
           className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors"
         >
-          <span className="font-medium text-slate-900">Nastavení pro {config?.label}</span>
+          <span className="font-medium text-slate-900">Settings for {config?.label}</span>
           {expandedSections.has('settings') ? (
             <ChevronDown className="w-5 h-5 text-slate-400" />
           ) : (

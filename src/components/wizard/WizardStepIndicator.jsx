@@ -62,7 +62,7 @@ export default function WizardStepIndicator({ steps, currentStep, onStepClick })
       {/* Progress Bar */}
       <div className="mt-6 pt-4 border-t border-slate-800">
         <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
-          <span>Postup</span>
+          <span>Progress</span>
           <span>{Math.round((currentStep / (steps.length - 1)) * 100)}%</span>
         </div>
         <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">

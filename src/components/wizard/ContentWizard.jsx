@@ -9,11 +9,11 @@ import VariantsStep from './steps/VariantsStep'
 import ReviewStep from './steps/ReviewStep'
 
 const STEPS = [
-  { id: 'type', label: 'Typ', description: 'Vyber co chceš vytvořit' },
-  { id: 'info', label: 'Základní info', description: 'Název a popis' },
-  { id: 'ai', label: 'AI Generace', description: 'Nech AI vytvořit obsah' },
-  { id: 'variants', label: 'Varianty', description: 'Přizpůsob pro segmenty' },
-  { id: 'review', label: 'Review', description: 'Zkontroluj a ulož' },
+  { id: 'type', label: 'Type', description: 'Choose what to create' },
+  { id: 'info', label: 'Basic Info', description: 'Name and description' },
+  { id: 'ai', label: 'AI Generation', description: 'Let AI create content' },
+  { id: 'variants', label: 'Variants', description: 'Customize for segments' },
+  { id: 'review', label: 'Review', description: 'Review and save' },
 ]
 
 const initialWizardData = {
@@ -191,7 +191,7 @@ export default function ContentWizard({ isOpen, onClose }) {
             </div>
             <div>
               <h1 className="font-semibold text-white">Content Wizard</h1>
-              <p className="text-xs text-slate-400">Vytvoř obsah s AI</p>
+              <p className="text-xs text-slate-400">Create content with AI</p>
             </div>
           </div>
           
@@ -203,7 +203,7 @@ export default function ContentWizard({ isOpen, onClose }) {
           
           <div className="mt-auto pt-6 border-t border-slate-800">
             <p className="text-xs text-slate-500">
-              Tip: Stiskni <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-slate-400">Enter</kbd> pro další krok
+              Tip: Press <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-slate-400">Enter</kbd> for next step
             </p>
           </div>
         </div>
@@ -252,7 +252,7 @@ export default function ContentWizard({ isOpen, onClose }) {
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
-              Zpět
+              Back
             </button>
             
             <div className="flex items-center gap-3">
@@ -261,7 +261,7 @@ export default function ContentWizard({ isOpen, onClose }) {
                   onClick={handleSkip}
                   className="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
                 >
-                  Přeskočit
+                  Skip
                 </button>
               )}
               
@@ -271,7 +271,7 @@ export default function ContentWizard({ isOpen, onClose }) {
                   disabled={!canProceed() || isGenerating}
                   className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Další
+                  Next
                   <ChevronRight className="w-4 h-4" />
                 </button>
               ) : null}

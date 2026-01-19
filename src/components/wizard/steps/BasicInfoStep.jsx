@@ -7,16 +7,16 @@ const typeConfig = {
     label: 'Objective',
     icon: Target,
     color: 'violet',
-    namePlaceholder: 'např. Zvýšit Brand Awareness o 25%',
-    descPlaceholder: 'Popište hlavní cíl a proč je důležitý pro vaši strategii...',
+    namePlaceholder: 'e.g. Increase Brand Awareness by 25%',
+    descPlaceholder: 'Describe the main goal and why it matters for your strategy...',
     parentType: null,
   },
   tactic: {
     label: 'Tactic',
     icon: Layers,
     color: 'blue',
-    namePlaceholder: 'např. Influencer Marketing Campaign',
-    descPlaceholder: 'Popište taktiku a jak pomůže dosáhnout cíle...',
+    namePlaceholder: 'e.g. Influencer Marketing Campaign',
+    descPlaceholder: 'Describe the tactic and how it helps achieve the goal...',
     parentType: 'objective',
     parentLabel: 'Parent Objective',
   },
@@ -24,8 +24,8 @@ const typeConfig = {
     label: 'Best Practice',
     icon: BookOpen,
     color: 'emerald',
-    namePlaceholder: 'např. Micro-influencer Vetting Process',
-    descPlaceholder: 'Popište best practice a kdy ji použít...',
+    namePlaceholder: 'e.g. Micro-influencer Vetting Process',
+    descPlaceholder: 'Describe the best practice and when to use it...',
     parentType: 'tactic',
     parentLabel: 'Parent Tactic',
   },
@@ -33,8 +33,8 @@ const typeConfig = {
     label: 'Step',
     icon: ListChecks,
     color: 'slate',
-    namePlaceholder: 'např. Nastavit UTM parametry',
-    descPlaceholder: 'Popište konkrétní krok nebo akci...',
+    namePlaceholder: 'e.g. Set up UTM parameters',
+    descPlaceholder: 'Describe the specific step or action...',
     parentType: 'bestPractice',
     parentLabel: 'Parent Best Practice',
   },
@@ -121,14 +121,14 @@ export default function BasicInfoStep({ data, updateData }) {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               {config.parentLabel}
-              <span className="text-slate-400 font-normal ml-1">(volitelné)</span>
+              <span className="text-slate-400 font-normal ml-1">(optional)</span>
             </label>
             <select
               value={data.parentId}
               onChange={(e) => updateData({ parentId: e.target.value })}
               className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-slate-900"
             >
-              <option value="">Bez parenta (standalone)</option>
+              <option value="">No parent (standalone)</option>
               {possibleParents.map(parent => (
                 <option key={parent.id} value={parent.id}>{parent.name}</option>
               ))}
@@ -139,7 +139,7 @@ export default function BasicInfoStep({ data, updateData }) {
         {/* Name */}
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-2">
-            Název <span className="text-red-500">*</span>
+            Name <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <input
@@ -159,7 +159,7 @@ export default function BasicInfoStep({ data, updateData }) {
               ) : (
                 <Sparkles className="w-3.5 h-3.5" />
               )}
-              Navrhni
+              Suggest
             </button>
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function BasicInfoStep({ data, updateData }) {
         {/* Description */}
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-2">
-            Popis
+            Description
           </label>
           <div className="relative">
             <textarea
@@ -187,12 +187,12 @@ export default function BasicInfoStep({ data, updateData }) {
               ) : (
                 <Sparkles className="w-3.5 h-3.5" />
               )}
-              Vygeneruj popis
+              Generate description
             </button>
           </div>
           {!data.name && (
             <p className="text-xs text-slate-400 mt-1">
-              Nejdřív vyplň název pro AI generaci popisu
+              Fill in the name first to generate description with AI
             </p>
           )}
         </div>
@@ -200,7 +200,7 @@ export default function BasicInfoStep({ data, updateData }) {
         {/* Status */}
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-2">
-            Počáteční status
+            Initial status
           </label>
           <div className="flex gap-2">
             {['draft', 'in-review'].map(status => (
@@ -224,7 +224,7 @@ export default function BasicInfoStep({ data, updateData }) {
       {/* Info box */}
       <div className="mt-8 p-4 bg-slate-50 rounded-xl">
         <p className="text-sm text-slate-600">
-          <span className="font-medium">💡 Tip:</span> V dalším kroku můžeš použít AI k vygenerování podrobnějšího obsahu včetně metrik, struktury a doporučení.
+          <span className="font-medium">💡 Tip:</span> In the next step, you can use AI to generate more detailed content including metrics, structure, and recommendations.
         </p>
       </div>
     </div>

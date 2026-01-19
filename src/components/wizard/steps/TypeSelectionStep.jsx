@@ -9,9 +9,9 @@ const types = [
     color: 'violet',
     gradient: 'from-violet-500 to-purple-600',
     bgLight: 'bg-violet-50',
-    description: 'Vysokoúrovňový cíl s metrikami a deadlinem',
-    examples: ['Zvýšit brand awareness o 25%', 'Získat 1000 nových leads', 'Zlepšit engagement rate'],
-    hint: 'Objectives definují CO chceme dosáhnout',
+    description: 'High-level goal with metrics and deadline',
+    examples: ['Increase brand awareness by 25%', 'Acquire 1000 new leads', 'Improve engagement rate'],
+    hint: 'Objectives define WHAT we want to achieve',
   },
   {
     id: 'tactic',
@@ -20,9 +20,9 @@ const types = [
     color: 'blue',
     gradient: 'from-blue-500 to-indigo-600',
     bgLight: 'bg-blue-50',
-    description: 'Strategie a přístup k dosažení cíle',
-    examples: ['Influencer marketing kampaň', 'Content calendar strategie', 'Paid social campaigns'],
-    hint: 'Tactics definují JAK dosáhneme objective',
+    description: 'Strategy and approach to reach the goal',
+    examples: ['Influencer marketing campaign', 'Content calendar strategy', 'Paid social campaigns'],
+    hint: 'Tactics define HOW we achieve the objective',
   },
   {
     id: 'bestPractice',
@@ -31,9 +31,9 @@ const types = [
     color: 'emerald',
     gradient: 'from-emerald-500 to-teal-600',
     bgLight: 'bg-emerald-50',
-    description: 'Doporučený postup nebo osvědčená praxe',
+    description: 'Recommended procedure or proven practice',
     examples: ['Micro-influencer outreach', 'A/B testing framework', 'Content pillar strategy'],
-    hint: 'Best practices jsou konkrétní návody uvnitř tactic',
+    hint: 'Best practices are specific guides within a tactic',
   },
   {
     id: 'step',
@@ -42,9 +42,9 @@ const types = [
     color: 'slate',
     gradient: 'from-slate-500 to-slate-700',
     bgLight: 'bg-slate-100',
-    description: 'Jednotlivý krok nebo akce k provedení',
-    examples: ['Nastavit UTM parametry', 'Zkontrolovat engagement metrics', 'Spustit automation'],
-    hint: 'Steps jsou konkrétní TODO položky',
+    description: 'Individual action or task to perform',
+    examples: ['Set up UTM parameters', 'Check engagement metrics', 'Launch automation'],
+    hint: 'Steps are specific TODO items',
   },
 ]
 
@@ -53,10 +53,10 @@ export default function TypeSelectionStep({ data, updateData }) {
     <div className="p-8 max-w-4xl mx-auto">
       <div className="text-center mb-8">
         <h3 className="text-2xl font-bold text-slate-900 mb-2">
-          Co chceš vytvořit?
+          What do you want to create?
         </h3>
         <p className="text-slate-600">
-          Vyber typ obsahu, který potřebuješ. AI ti pomůže s obsahem.
+          Choose the type of content you need. AI will help you with the content.
         </p>
       </div>
       
@@ -125,7 +125,7 @@ export default function TypeSelectionStep({ data, updateData }) {
       {/* Hierarchy hint */}
       <div className="mt-8 p-4 bg-slate-50 rounded-xl">
         <p className="text-sm text-slate-600 text-center">
-          <span className="font-medium">Hierarchie:</span>{' '}
+          <span className="font-medium">Hierarchy:</span>{' '}
           <span className="text-violet-600">Objective</span> → 
           <span className="text-blue-600"> Tactic</span> → 
           <span className="text-emerald-600"> Best Practice</span> → 
