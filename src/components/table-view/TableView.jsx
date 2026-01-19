@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { 
   DndContext, 
   DragOverlay,
@@ -180,44 +180,62 @@ export default function TableView() {
         </div>
         
         {/* Scrollable Table Container */}
-        <div className="flex-1 overflow-x-auto overflow-y-auto bg-white rounded-lg border border-slate-200">
-          <div className="min-w-[1000px]">
+        <div className="flex-1 overflow-auto bg-white rounded-lg border border-slate-200">
+          <table className="border-collapse table-fixed" style={{ minWidth: '1100px' }}>
+            <colgroup>
+              <col style={{ width: '320px', minWidth: '320px' }} />
+              <col style={{ width: '100px', minWidth: '100px' }} />
+              <col style={{ width: '140px', minWidth: '140px' }} />
+              <col style={{ width: '110px', minWidth: '110px' }} />
+              <col style={{ width: '80px', minWidth: '80px' }} />
+              <col style={{ width: '80px', minWidth: '80px' }} />
+              <col style={{ width: '120px', minWidth: '120px' }} />
+              <col style={{ width: '150px', minWidth: '150px' }} />
+            </colgroup>
             {/* Table Header */}
-            <div className="sticky top-0 z-10 bg-white border-b border-slate-200">
-              <div className="grid grid-cols-[56px_1fr_100px_120px_100px_80px_80px_100px_140px] gap-2 px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                <div></div>
-                <div>Name</div>
-                <div>Impact</div>
-                <div>Targeting</div>
-                <div>Status</div>
-                <div>Quality</div>
-                <div>Usage</div>
-                <div>Last Edit</div>
-                <div></div>
-              </div>
-            </div>
+            <thead className="sticky top-0 z-20 bg-white border-b border-slate-200">
+              <tr className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="sticky left-0 z-30 bg-white text-left px-4 py-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-14"></span>
+                    <span>Name</span>
+                  </div>
+                </th>
+                <th className="text-left px-3 py-3">Impact</th>
+                <th className="text-left px-3 py-3">Targeting</th>
+                <th className="text-left px-3 py-3">Status</th>
+                <th className="text-left px-3 py-3">Quality</th>
+                <th className="text-left px-3 py-3">Usage</th>
+                <th className="text-left px-3 py-3">Last Edit</th>
+                <th className="text-left px-3 py-3"></th>
+              </tr>
+            </thead>
             
             {/* Table Body */}
-            <div>
+            <tbody>
               <HierarchyView objectives={objectives} items={filteredItems} activeId={activeId} />
-            </div>
-          </div>
+            </tbody>
+          </table>
         </div>
       </div>
       
       {/* Drag Overlay */}
       <DragOverlay>
         {activeItem ? (
-          <div className="bg-white shadow-xl rounded-lg border-2 border-teal-500 opacity-90">
-            <HierarchyRow
-              item={activeItem}
-              depth={0}
-              isExpanded={false}
-              hasChildren={false}
-              onToggle={() => {}}
-              onSelect={() => {}}
-              isDragging
-            />
+          <div className="bg-white shadow-xl rounded-lg border-2 border-teal-500 opacity-90 px-4 py-2.5">
+            <div className="flex items-center gap-2">
+              <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${
+                activeItem.type === 'objective' ? 'bg-violet-100 text-violet-700' :
+                activeItem.type === 'tactic' ? 'bg-blue-100 text-blue-700' :
+                activeItem.type === 'bestPractice' ? 'bg-emerald-100 text-emerald-700' :
+                'bg-slate-100 text-slate-700'
+              }`}>
+                {activeItem.type === 'objective' ? 'OBJ' :
+                 activeItem.type === 'tactic' ? 'TAC' :
+                 activeItem.type === 'bestPractice' ? 'BP' : 'STEP'}
+              </span>
+              <span className="text-sm font-medium text-slate-900">{activeItem.name}</span>
+            </div>
           </div>
         ) : null}
       </DragOverlay>
@@ -247,7 +265,6 @@ function HierarchyView({ objectives, items, activeId }) {
       .filter(Boolean)
     const isExpanded = expandedIds.has(item.id)
     const hasChildren = children.length > 0
-    const isDragging = activeId === item.id
     
     // Tree structure props
     const treeProps = {
@@ -260,6 +277,7 @@ function HierarchyView({ objectives, items, activeId }) {
         case 'objective':
           return (
             <DroppableObjective
+              key={item.id}
               item={item}
               depth={depth}
               isExpanded={isExpanded}
@@ -273,6 +291,7 @@ function HierarchyView({ objectives, items, activeId }) {
         case 'bestPractice':
           return (
             <DraggableDroppableRow
+              key={item.id}
               item={item}
               depth={depth}
               isExpanded={isExpanded}
@@ -286,6 +305,7 @@ function HierarchyView({ objectives, items, activeId }) {
         default:
           return (
             <DraggableRow
+              key={item.id}
               item={item}
               depth={depth}
               isExpanded={isExpanded}
@@ -308,32 +328,33 @@ function HierarchyView({ objectives, items, activeId }) {
     // Add a new level for children (will be set per-child based on their position)
     childConnectorLevels[depth] = true
     
+    // Components now return <tr> elements (or fragments with <tr>), so we return them directly
     return (
-      <div key={item.id} className={isDragging ? 'opacity-30' : ''}>
+      <React.Fragment key={item.id}>
         {getRowComponent()}
         {isExpanded && hasChildren && (
-          <div>
-            {children.map((child, index) => {
-              const isLast = index === children.length - 1
-              return renderItemWithChildren(child, depth + 1, childConnectorLevels, isLast)
-            })}
-          </div>
+          children.map((child, index) => {
+            const isLast = index === children.length - 1
+            return renderItemWithChildren(child, depth + 1, childConnectorLevels, isLast)
+          })
         )}
-      </div>
+      </React.Fragment>
     )
   }
   
   if (objectives.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-slate-500">
-        No items match your filters
-      </div>
+      <tr>
+        <td colSpan={8} className="text-center py-16 text-slate-500">
+          No items match your filters
+        </td>
+      </tr>
     )
   }
   
   return (
-    <div>
+    <>
       {objectives.map((obj, index) => renderItemWithChildren(obj, 0, [], index === objectives.length - 1))}
-    </div>
+    </>
   )
 }

@@ -40,7 +40,9 @@ export default function HierarchyRow({
   dragHandleProps,
   isDragging,
   isDropTarget,
-  treeProps = { connectorLevels: [], isLastSibling: true }
+  treeProps = { connectorLevels: [], isLastSibling: true },
+  rowRef,
+  rowStyle
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -79,10 +81,12 @@ export default function HierarchyRow({
   const canDrag = item.type !== 'objective'
   
   return (
-    <div 
-      className={`group grid grid-cols-[56px_1fr_100px_120px_100px_80px_80px_100px_140px] gap-2 px-4 py-2.5 items-center border-b border-slate-100 hover:bg-slate-50/50 transition-colors cursor-pointer relative
-        ${isDragging ? 'bg-teal-50 shadow-lg' : ''}
-        ${isDropTarget ? 'bg-teal-50' : ''}`}
+    <tr 
+      ref={rowRef}
+      style={rowStyle}
+      className={`group border-b border-slate-100 hover:bg-slate-50/50 transition-colors cursor-pointer
+        ${isDragging ? 'bg-teal-50 shadow-lg opacity-30' : ''}
+        ${isDropTarget ? 'bg-teal-50 ring-2 ring-teal-400 ring-inset' : ''}`}
       onClick={(e) => {
         // Don't select if clicking on interactive elements
         if (e.target.closest('button') || e.target.closest('select') || e.target.closest('input')) {
@@ -91,295 +95,300 @@ export default function HierarchyRow({
         onSelect()
       }}
     >
-      {/* Expand/Collapse + Drag Handle */}
-      <div className="flex items-center gap-0">
-        {/* Drag Handle - visible for draggable items, shown first */}
-        {canDrag && dragHandleProps ? (
-          <button
-            {...dragHandleProps}
-            className="p-2 -m-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded cursor-grab active:cursor-grabbing transition-colors flex-shrink-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <GripVertical className="w-4 h-4" />
-          </button>
-        ) : (
-          <div className="w-7 flex-shrink-0" />
-        )}
-        
-        {/* Expand/collapse button */}
-        {hasChildren ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onToggle()
-            }}
-            className="p-2 -m-1 hover:bg-slate-200 rounded transition-colors flex-shrink-0"
-          >
-            <motion.div
-              animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.15 }}
+      {/* STICKY: Expand/Collapse + Drag Handle + Name */}
+      <td className={`sticky left-0 z-10 px-4 py-2.5 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors ${isDragging ? 'bg-teal-50' : isDropTarget ? 'bg-teal-50' : 'bg-white group-hover:bg-slate-50'}`}>
+        <div className="flex items-center gap-0">
+          {/* Drag Handle - visible for draggable items, shown first */}
+          {canDrag && dragHandleProps ? (
+            <button
+              {...dragHandleProps}
+              className="p-2 -m-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded cursor-grab active:cursor-grabbing transition-colors flex-shrink-0"
+              onClick={(e) => e.stopPropagation()}
             >
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            </motion.div>
-          </button>
-        ) : (
-          <div className="w-7 flex-shrink-0" />
-        )}
-      </div>
-      
-      {/* Name with type badge - tree structure with connecting lines */}
-      <div className="flex items-center gap-2 min-w-0 relative">
-        {/* Tree connector lines - extends beyond row boundaries for seamless connections */}
-        {typeInfo.indent > 0 && (
-          <div 
-            className="flex-shrink-0 relative" 
-            style={{ width: typeInfo.indent * 20, height: 60, marginTop: -10, marginBottom: -10 }}
-          >
-            {/* Render vertical lines for each depth level */}
-            {Array.from({ length: typeInfo.indent }).map((_, levelIndex) => {
-              // For continuation lines at previous levels (items above have more siblings)
-              const showContinuationLine = levelIndex < typeInfo.indent - 1 && connectorLevels[levelIndex]
-              // For the current level (where we draw the corner/T connector)
-              const isCurrentLevel = levelIndex === typeInfo.indent - 1
-              const lineX = levelIndex * 20 + 9
-              
-              return (
-                <div key={levelIndex}>
-                  {/* Continuation vertical line - full height through row for siblings at this level */}
-                  {showContinuationLine && (
-                    <div 
-                      className="absolute bg-slate-300"
-                      style={{ 
-                        left: lineX, 
-                        width: 1, 
-                        top: 0,
-                        height: 60
-                      }}
-                    />
-                  )}
+              <GripVertical className="w-4 h-4" />
+            </button>
+          ) : (
+            <div className="w-7 flex-shrink-0" />
+          )}
+          
+          {/* Expand/collapse button */}
+          {hasChildren ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggle()
+              }}
+              className="p-2 -m-1 hover:bg-slate-200 rounded transition-colors flex-shrink-0"
+            >
+              <motion.div
+                animate={{ rotate: isExpanded ? 90 : 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+              </motion.div>
+            </button>
+          ) : (
+            <div className="w-7 flex-shrink-0" />
+          )}
+          
+          {/* Name with type badge - tree structure with connecting lines */}
+          <div className="flex items-center gap-2 min-w-0 relative ml-1">
+            {/* Tree connector lines - extends beyond row boundaries for seamless connections */}
+            {typeInfo.indent > 0 && (
+              <div 
+                className="flex-shrink-0 relative" 
+                style={{ width: typeInfo.indent * 20, height: 60, marginTop: -10, marginBottom: -10 }}
+              >
+                {/* Render vertical lines for each depth level */}
+                {Array.from({ length: typeInfo.indent }).map((_, levelIndex) => {
+                  // For continuation lines at previous levels (items above have more siblings)
+                  const showContinuationLine = levelIndex < typeInfo.indent - 1 && connectorLevels[levelIndex]
+                  // For the current level (where we draw the corner/T connector)
+                  const isCurrentLevel = levelIndex === typeInfo.indent - 1
+                  const lineX = levelIndex * 20 + 9
                   
-                  {/* Current level connector */}
-                  {isCurrentLevel && (
-                    <>
-                      {/* Vertical line - full height if more siblings, half if last */}
-                      <div 
-                        className="absolute bg-slate-300"
-                        style={{ 
-                          left: lineX, 
-                          width: 1,
-                          top: 0,
-                          height: isLastSibling ? 30 : 60
-                        }}
-                      />
-                      {/* Horizontal connector to badge */}
-                      <div 
-                        className="absolute bg-slate-300"
-                        style={{ 
-                          left: lineX, 
-                          top: 30, 
-                          width: 10, 
-                          height: 1
-                        }}
-                      />
-                    </>
-                  )}
-                </div>
-              )
-            })}
+                  return (
+                    <div key={levelIndex}>
+                      {/* Continuation vertical line - full height through row for siblings at this level */}
+                      {showContinuationLine && (
+                        <div 
+                          className="absolute bg-slate-300"
+                          style={{ 
+                            left: lineX, 
+                            width: 1, 
+                            top: 0,
+                            height: 60
+                          }}
+                        />
+                      )}
+                      
+                      {/* Current level connector */}
+                      {isCurrentLevel && (
+                        <>
+                          {/* Vertical line - full height if more siblings, half if last */}
+                          <div 
+                            className="absolute bg-slate-300"
+                            style={{ 
+                              left: lineX, 
+                              width: 1,
+                              top: 0,
+                              height: isLastSibling ? 30 : 60
+                            }}
+                          />
+                          {/* Horizontal connector to badge */}
+                          <div 
+                            className="absolute bg-slate-300"
+                            style={{ 
+                              left: lineX, 
+                              top: 30, 
+                              width: 10, 
+                              height: 1
+                            }}
+                          />
+                        </>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            
+            {/* Downward line from expanded parent to children */}
+            {isExpanded && hasChildren && (
+              <div 
+                className="absolute bg-slate-300"
+                style={{ 
+                  left: typeInfo.indent * 20 + 9 + (typeInfo.indent > 0 ? 0 : 0),
+                  width: 1,
+                  top: 30,
+                  height: 30
+                }}
+              />
+            )}
+            
+            <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${typeInfo.color} flex-shrink-0`}>
+              {typeInfo.label}
+            </span>
+            
+            {/* Child count - subtle, after badge */}
+            {(item.type === 'objective' || item.type === 'tactic' || item.type === 'bestPractice') && item.childIds?.length > 0 && (
+              <span className="text-[10px] text-slate-400 font-normal">
+                ({item.childIds.length})
+              </span>
+            )}
+            
+            {isEditing ? (
+              <InlineEditor
+                value={item.name}
+                onSave={handleNameSave}
+                onCancel={() => setIsEditing(false)}
+              />
+            ) : (
+              <span 
+                className="text-sm font-medium text-slate-900 truncate cursor-text hover:bg-slate-100 px-1 rounded max-w-[140px]"
+                onDoubleClick={(e) => {
+                  e.stopPropagation()
+                  setIsEditing(true)
+                }}
+                title={item.name}
+              >
+                {item.name}
+              </span>
+            )}
+            
+            {/* Many-to-many indicator */}
+            {parentCount > 1 && (
+              <UsedInBadge count={parentCount} type={item.type} />
+            )}
           </div>
-        )}
-        
-        {/* Downward line from expanded parent to children */}
-        {isExpanded && hasChildren && (
-          <div 
-            className="absolute bg-slate-300"
-            style={{ 
-              left: typeInfo.indent * 20 + 9 + (typeInfo.indent > 0 ? 0 : 0),
-              width: 1,
-              top: 30,
-              height: 30
-            }}
-          />
-        )}
-        
-        <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${typeInfo.color} flex-shrink-0`}>
-          {typeInfo.label}
-        </span>
-        
-        {/* Child count - subtle, after badge */}
-        {(item.type === 'objective' || item.type === 'tactic' || item.type === 'bestPractice') && item.childIds?.length > 0 && (
-          <span className="text-[10px] text-slate-400 font-normal">
-            ({item.childIds.length})
-          </span>
-        )}
-        
-        {isEditing ? (
-          <InlineEditor
-            value={item.name}
-            onSave={handleNameSave}
-            onCancel={() => setIsEditing(false)}
-          />
-        ) : (
-          <span 
-            className="text-sm font-medium text-slate-900 truncate cursor-text hover:bg-slate-100 px-1 rounded"
-            onDoubleClick={(e) => {
-              e.stopPropagation()
-              setIsEditing(true)
-            }}
-          >
-            {item.name}
-          </span>
-        )}
-        
-        {/* Many-to-many indicator */}
-        {parentCount > 1 && (
-          <UsedInBadge count={parentCount} type={item.type} />
-        )}
-      </div>
+        </div>
+      </td>
       
       {/* Impact */}
-      <div>
+      <td className="px-3 py-2.5">
         <ImpactBadge usageCount={item.usageCount} qualityScore={item.qualityScore} />
-      </div>
+      </td>
       
       {/* Targeting */}
-      <div className="overflow-hidden">
+      <td className="px-3 py-2.5 overflow-hidden">
         <TargetingPills targeting={item.targeting} maxPills={2} />
-      </div>
+      </td>
       
       {/* Status */}
-      <div onClick={(e) => e.stopPropagation()}>
+      <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
         <StatusDropdown 
           status={item.status} 
           onChange={(newStatus) => updateItem(item.id, { status: newStatus })}
         />
-      </div>
+      </td>
       
       {/* Quality Score */}
-      <div>
+      <td className="px-3 py-2.5">
         {item.qualityScore !== undefined && (
           <QualityScore score={item.qualityScore} />
         )}
-      </div>
+      </td>
       
       {/* Usage */}
-      <div className="text-sm text-slate-600">
+      <td className="px-3 py-2.5 text-sm text-slate-600">
         {item.usageCount !== undefined ? (
           <span>{item.usageCount}</span>
         ) : (
           <span className="text-slate-400">-</span>
         )}
-      </div>
+      </td>
       
       {/* Last Edit */}
-      <div className="text-xs text-slate-500 truncate">
+      <td className="px-3 py-2.5 text-xs text-slate-500 truncate max-w-[100px]">
         {item.lastEditedBy && (
-          <span>{item.lastEditedBy}, {lastEdited}</span>
+          <span title={`${item.lastEditedBy}, ${lastEdited}`}>{item.lastEditedBy}, {lastEdited}</span>
         )}
-      </div>
+      </td>
       
       {/* Quick Actions + Menu */}
-      <div className="relative flex items-center gap-1">
-        {/* Quick Actions - visible on hover */}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <QuickActions 
-            item={item} 
-            onAiClick={() => {
-              setAiPanelOpen(true)
+      <td className="px-3 py-2.5">
+        <div className="relative flex items-center gap-1">
+          {/* Quick Actions - visible on hover */}
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <QuickActions 
+              item={item} 
+              onAiClick={() => {
+                setAiPanelOpen(true)
+              }}
+            />
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setMenuOpen(!menuOpen)
             }}
-          />
-        </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            setMenuOpen(!menuOpen)
-          }}
-          className="p-1 opacity-0 group-hover:opacity-100 hover:bg-slate-200 rounded transition-all"
-        >
-          <MoreHorizontal className="w-4 h-4 text-slate-400" />
-        </button>
-        
-        <AnimatePresence>
-          {menuOpen && (
-            <>
-              <div 
-                className="fixed inset-0 z-10" 
-                onClick={() => setMenuOpen(false)} 
-              />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="absolute right-0 top-8 w-52 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-20"
-              >
-                <button
-                  onClick={() => {
-                    setAiPanelOpen(true)
-                    setMenuOpen(false)
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+            className="p-1 opacity-0 group-hover:opacity-100 hover:bg-slate-200 rounded transition-all"
+          >
+            <MoreHorizontal className="w-4 h-4 text-slate-400" />
+          </button>
+          
+          <AnimatePresence>
+            {menuOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setMenuOpen(false)} 
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="absolute right-0 top-8 w-52 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-20"
                 >
-                  <Sparkles className="w-4 h-4 text-teal-500" />
-                  Generate with AI
-                </button>
-                
-                <button
-                  onClick={handleDuplicate}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                >
-                  <Copy className="w-4 h-4" />
-                  Duplicate
-                </button>
-                
-                {item.type !== 'objective' && (
-                  <>
-                    <hr className="my-1 border-slate-200" />
-                    <div className="px-3 py-1.5 text-xs font-medium text-slate-400 uppercase">
-                      Move to...
-                    </div>
-                    <button
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <MoveVertical className="w-4 h-4" />
-                      Drag to move
-                    </button>
-                  </>
-                )}
-                
-                {parentCount > 1 && (
-                  <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                    <Unlink className="w-4 h-4" />
-                    Unlink from parent
+                  <button
+                    onClick={() => {
+                      setAiPanelOpen(true)
+                      setMenuOpen(false)
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                  >
+                    <Sparkles className="w-4 h-4 text-teal-500" />
+                    Generate with AI
                   </button>
-                )}
-                
-                <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                  <Link2 className="w-4 h-4" />
-                  Link to another parent
-                </button>
-                
-                <hr className="my-1 border-slate-200" />
-                
-                <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                  <ExternalLink className="w-4 h-4" />
-                  View in app.emplifi.io
-                </button>
-                
-                <hr className="my-1 border-slate-200" />
-                
-                <button 
-                  onClick={handleDelete}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
-                </button>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
+                  
+                  <button
+                    onClick={handleDuplicate}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Duplicate
+                  </button>
+                  
+                  {item.type !== 'objective' && (
+                    <>
+                      <hr className="my-1 border-slate-200" />
+                      <div className="px-3 py-1.5 text-xs font-medium text-slate-400 uppercase">
+                        Move to...
+                      </div>
+                      <button
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <MoveVertical className="w-4 h-4" />
+                        Drag to move
+                      </button>
+                    </>
+                  )}
+                  
+                  {parentCount > 1 && (
+                    <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                      <Unlink className="w-4 h-4" />
+                      Unlink from parent
+                    </button>
+                  )}
+                  
+                  <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                    <Link2 className="w-4 h-4" />
+                    Link to another parent
+                  </button>
+                  
+                  <hr className="my-1 border-slate-200" />
+                  
+                  <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                    <ExternalLink className="w-4 h-4" />
+                    View in app.emplifi.io
+                  </button>
+                  
+                  <hr className="my-1 border-slate-200" />
+                  
+                  <button 
+                    onClick={handleDelete}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+      </td>
+    </tr>
   )
 }

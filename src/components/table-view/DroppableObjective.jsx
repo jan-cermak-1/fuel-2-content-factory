@@ -7,15 +7,11 @@ export default function DroppableObjective({ item, ...props }) {
   })
   
   return (
-    <div 
-      ref={setNodeRef}
-      className={`transition-colors ${isOver ? 'bg-teal-50 ring-2 ring-teal-400 ring-inset' : ''}`}
-    >
-      <HierarchyRow
-        item={item}
-        {...props}
-        isDropTarget={isOver}
-      />
-    </div>
+    <HierarchyRow
+      item={item}
+      {...props}
+      isDropTarget={isOver}
+      rowRef={setNodeRef}
+    />
   )
 }

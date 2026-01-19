@@ -35,42 +35,46 @@ export default function DraggableRow({ item, ...props }) {
   const showDropZones = isSomethingDragging && !isDragging
   
   return (
-    <div className="relative">
-      {/* Drop indicator BEFORE - only active when dragging */}
+    <>
+      {/* Drop indicator BEFORE - rendered as a separate row */}
       {showDropZones && (
-        <div 
-          ref={setBeforeDropRef}
-          className="absolute top-0 left-0 right-0 h-1/2 z-10"
-        />
-      )}
-      {isOverBefore && showDropZones && (
-        <div className="absolute top-0 left-4 right-4 h-0.5 bg-teal-500 z-20 rounded-full shadow-lg shadow-teal-500/50" />
+        <tr className="h-0 relative">
+          <td colSpan={8} className="p-0 relative">
+            <div 
+              ref={setBeforeDropRef}
+              className="absolute -top-2 left-0 right-0 h-4 z-10"
+            />
+            {isOverBefore && (
+              <div className="absolute top-0 left-4 right-4 h-0.5 bg-teal-500 z-20 rounded-full shadow-lg shadow-teal-500/50" />
+            )}
+          </td>
+        </tr>
       )}
       
       {/* Main row */}
-      <div 
-        ref={setDragRef} 
-        style={style}
-        className={isDragging ? 'opacity-30 bg-slate-100' : ''}
-      >
-        <HierarchyRow
-          item={item}
-          {...props}
-          dragHandleProps={{ ...attributes, ...listeners }}
-          isDragging={isDragging}
-        />
-      </div>
+      <HierarchyRow
+        item={item}
+        {...props}
+        dragHandleProps={{ ...attributes, ...listeners }}
+        isDragging={isDragging}
+        rowRef={setDragRef}
+        rowStyle={style}
+      />
       
-      {/* Drop indicator AFTER - only active when dragging */}
+      {/* Drop indicator AFTER - rendered as a separate row */}
       {showDropZones && (
-        <div 
-          ref={setAfterDropRef}
-          className="absolute bottom-0 left-0 right-0 h-1/2 z-10"
-        />
+        <tr className="h-0 relative">
+          <td colSpan={8} className="p-0 relative">
+            <div 
+              ref={setAfterDropRef}
+              className="absolute -bottom-2 left-0 right-0 h-4 z-10"
+            />
+            {isOverAfter && (
+              <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-teal-500 z-20 rounded-full shadow-lg shadow-teal-500/50" />
+            )}
+          </td>
+        </tr>
       )}
-      {isOverAfter && showDropZones && (
-        <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-teal-500 z-20 rounded-full shadow-lg shadow-teal-500/50" />
-      )}
-    </div>
+    </>
   )
 }

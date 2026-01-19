@@ -49,44 +49,50 @@ export default function DraggableDroppableRow({ item, ...props }) {
   // Only show drop zones when something is being dragged (but not this item itself)
   const showDropZones = isSomethingDragging && !isDragging
   
+  // We need to wrap in a tbody fragment to allow for drop zones
+  // The HierarchyRow is now a <tr>, so we return it directly with ref attached via a wrapper
   return (
-    <div className="relative">
-      {/* Drop indicator BEFORE - only active when dragging */}
+    <>
+      {/* Drop indicator BEFORE - rendered as a separate row */}
       {showDropZones && (
-        <div 
-          ref={setBeforeDropRef}
-          className="absolute top-0 left-0 right-0 h-1/2 z-10"
-        />
-      )}
-      {isOverBefore && showDropZones && (
-        <div className="absolute top-0 left-4 right-4 h-0.5 bg-teal-500 z-20 rounded-full shadow-lg shadow-teal-500/50" />
+        <tr className="h-0 relative">
+          <td colSpan={8} className="p-0 relative">
+            <div 
+              ref={setBeforeDropRef}
+              className="absolute -top-2 left-0 right-0 h-4 z-10"
+            />
+            {isOverBefore && (
+              <div className="absolute top-0 left-4 right-4 h-0.5 bg-teal-500 z-20 rounded-full shadow-lg shadow-teal-500/50" />
+            )}
+          </td>
+        </tr>
       )}
       
-      {/* Main row */}
-      <div 
-        ref={setNodeRef} 
-        style={style}
-        className={`${isDragging ? 'opacity-30 bg-slate-100' : ''} ${isOver ? 'ring-2 ring-teal-400 ring-inset bg-teal-50' : ''}`}
-      >
-        <HierarchyRow
-          item={item}
-          {...props}
-          dragHandleProps={{ ...attributes, ...listeners }}
-          isDragging={isDragging}
-          isDropTarget={isOver}
-        />
-      </div>
+      {/* Main row - using a wrapper approach */}
+      <HierarchyRow
+        item={item}
+        {...props}
+        dragHandleProps={{ ...attributes, ...listeners }}
+        isDragging={isDragging}
+        isDropTarget={isOver}
+        rowRef={setNodeRef}
+        rowStyle={style}
+      />
       
-      {/* Drop indicator AFTER - only active when dragging */}
+      {/* Drop indicator AFTER - rendered as a separate row */}
       {showDropZones && (
-        <div 
-          ref={setAfterDropRef}
-          className="absolute bottom-0 left-0 right-0 h-1/2 z-10"
-        />
+        <tr className="h-0 relative">
+          <td colSpan={8} className="p-0 relative">
+            <div 
+              ref={setAfterDropRef}
+              className="absolute -bottom-2 left-0 right-0 h-4 z-10"
+            />
+            {isOverAfter && (
+              <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-teal-500 z-20 rounded-full shadow-lg shadow-teal-500/50" />
+            )}
+          </td>
+        </tr>
       )}
-      {isOverAfter && showDropZones && (
-        <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-teal-500 z-20 rounded-full shadow-lg shadow-teal-500/50" />
-      )}
-    </div>
+    </>
   )
 }
