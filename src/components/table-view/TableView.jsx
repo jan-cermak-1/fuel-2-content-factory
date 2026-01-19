@@ -12,6 +12,7 @@ import { getRootItems, getChildrenOf } from '../../data/seedData'
 import HierarchyRow from './HierarchyRow'
 import DraggableRow from './DraggableRow'
 import DroppableObjective from './DroppableObjective'
+import DraggableDroppableRow from './DraggableDroppableRow'
 import DragConfirmModal from './DragConfirmModal'
 import PerspectiveSwitcher from './PerspectiveSwitcher'
 import { groupByIndustry, groupByAccount } from '../../data/relationships'
@@ -199,42 +200,55 @@ function HierarchyView({ objectives, items, activeId }) {
     const hasChildren = children.length > 0
     const isDragging = activeId === item.id
     
-    // Determine if this item can be dragged
-    const canDrag = item.type !== 'objective' // Objectives cannot be dragged (they are top level)
+    // Determine component type based on item type
+    // - Objectives: only droppable (can receive tactics)
+    // - Tactics: draggable + droppable (can be moved, can receive best practices)
+    // - Best Practices: draggable + droppable (can be moved, can receive steps)
+    // - Steps: only draggable (can be moved, no children)
     
-    // Determine if this item can receive drops
-    const canReceiveDrop = item.type === 'objective' || item.type === 'tactic' || item.type === 'bestPractice'
+    const getRowComponent = () => {
+      switch (item.type) {
+        case 'objective':
+          return (
+            <DroppableObjective
+              item={item}
+              depth={depth}
+              isExpanded={isExpanded}
+              hasChildren={hasChildren}
+              onToggle={() => toggleExpanded(item.id)}
+              onSelect={() => selectItem(item.id)}
+            />
+          )
+        case 'tactic':
+        case 'bestPractice':
+          return (
+            <DraggableDroppableRow
+              item={item}
+              depth={depth}
+              isExpanded={isExpanded}
+              hasChildren={hasChildren}
+              onToggle={() => toggleExpanded(item.id)}
+              onSelect={() => selectItem(item.id)}
+            />
+          )
+        case 'step':
+        default:
+          return (
+            <DraggableRow
+              item={item}
+              depth={depth}
+              isExpanded={isExpanded}
+              hasChildren={hasChildren}
+              onToggle={() => toggleExpanded(item.id)}
+              onSelect={() => selectItem(item.id)}
+            />
+          )
+      }
+    }
     
     return (
       <div key={item.id} className={isDragging ? 'opacity-30' : ''}>
-        {canDrag ? (
-          <DraggableRow
-            item={item}
-            depth={depth}
-            isExpanded={isExpanded}
-            hasChildren={hasChildren}
-            onToggle={() => toggleExpanded(item.id)}
-            onSelect={() => selectItem(item.id)}
-          />
-        ) : canReceiveDrop ? (
-          <DroppableObjective
-            item={item}
-            depth={depth}
-            isExpanded={isExpanded}
-            hasChildren={hasChildren}
-            onToggle={() => toggleExpanded(item.id)}
-            onSelect={() => selectItem(item.id)}
-          />
-        ) : (
-          <HierarchyRow
-            item={item}
-            depth={depth}
-            isExpanded={isExpanded}
-            hasChildren={hasChildren}
-            onToggle={() => toggleExpanded(item.id)}
-            onSelect={() => selectItem(item.id)}
-          />
-        )}
+        {getRowComponent()}
         {isExpanded && hasChildren && (
           <div>
             {children.map(child => renderItemWithChildren(child, depth + 1))}
