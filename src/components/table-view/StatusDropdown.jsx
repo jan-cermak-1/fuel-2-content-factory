@@ -9,13 +9,15 @@ const statusConfig = {
 
 export default function StatusDropdown({ status, onChange }) {
   const config = statusConfig[status] || statusConfig.draft
+  // Extract text color from config
+  const textColor = config.color.split(' ').find(c => c.startsWith('text-')) || 'text-slate-700'
   
   return (
-    <div className="relative">
+    <div className="relative inline-block w-[110px]">
       <select
         value={status}
         onChange={(e) => onChange(e.target.value)}
-        className={`appearance-none text-xs font-medium px-2 py-1 pr-6 rounded-full border cursor-pointer
+        className={`appearance-none text-xs font-medium px-2.5 py-1 pr-7 rounded-full border cursor-pointer w-full
           focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500
           ${config.color}`}
       >
@@ -25,7 +27,7 @@ export default function StatusDropdown({ status, onChange }) {
           </option>
         ))}
       </select>
-      <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none" />
+      <ChevronDown className={`absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none ${textColor}`} />
     </div>
   )
 }

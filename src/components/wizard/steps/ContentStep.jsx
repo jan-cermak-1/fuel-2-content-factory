@@ -21,10 +21,14 @@ import {
   Table,
   Zap,
   Play,
-  Link2
+  Link2,
+  Globe
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFuel } from '../../../context/FuelContext'
+import ScopeSelector from '../../common/ScopeSelector'
+import ProductRequirements from '../../common/ProductRequirements'
+import { aiService } from '../../../services/aiService'
 
 // Metrics and data sources for objectives
 const metricsOptions = [
@@ -862,6 +866,46 @@ export default function ContentStep({ data, updateData, isGenerating, setIsGener
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+      )}
+      
+      {/* Targeting & Products Section */}
+      {(data.type === 'objective' || data.type === 'tactic') && (
+        <div className="mt-6 space-y-6">
+          <div className="border-t border-slate-200 pt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Globe className="w-5 h-5 text-blue-500" />
+              <h3 className="font-semibold text-slate-900">Targeting & Requirements</h3>
+            </div>
+            
+            {/* Scope selector */}
+            <div className="bg-white border border-slate-200 rounded-xl p-4 mb-4">
+              <ScopeSelector
+                scope={data.scope || { type: 'universal', industries: [], accounts: [], regions: [], jobRoles: [] }}
+                onChange={(newScope) => updateData({ scope: newScope })}
+                showAISuggestion={true}
+                onAISuggest={async () => {
+                  if (data.name || data.description) {
+                    const result = await aiService.suggestScope({ name: data.name, description: data.description })
+                    if (result.suggestedScope) {
+                      updateData({ scope: result.suggestedScope })
+                    }
+                  }
+                }}
+              />
+            </div>
+            
+            {/* Product requirements */}
+            <div className="bg-white border border-slate-200 rounded-xl p-4">
+              <ProductRequirements
+                selectedProducts={data.requiredProducts || []}
+                onChange={(newProducts) => updateData({ requiredProducts: newProducts })}
+                content={{ name: data.name, description: data.description, type: data.type }}
+                showAISuggestion={true}
+                columns={3}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

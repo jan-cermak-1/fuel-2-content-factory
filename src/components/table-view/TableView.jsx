@@ -181,16 +181,14 @@ export default function TableView() {
         
         {/* Scrollable Table Container */}
         <div className="flex-1 overflow-auto bg-white rounded-lg border border-slate-200">
-          <table className="border-collapse table-fixed" style={{ minWidth: '1100px' }}>
+          <table className="w-full border-collapse min-w-[1000px]">
             <colgroup>
-              <col style={{ width: '320px', minWidth: '320px' }} />
-              <col style={{ width: '100px', minWidth: '100px' }} />
-              <col style={{ width: '140px', minWidth: '140px' }} />
-              <col style={{ width: '110px', minWidth: '110px' }} />
-              <col style={{ width: '80px', minWidth: '80px' }} />
-              <col style={{ width: '80px', minWidth: '80px' }} />
-              <col style={{ width: '120px', minWidth: '120px' }} />
-              <col style={{ width: '150px', minWidth: '150px' }} />
+              <col style={{ minWidth: '400px' }} />
+              <col className="w-[110px] min-w-[110px]" />
+              <col className="w-[12%] min-w-[140px]" />
+              <col className="w-[7%] min-w-[80px]" />
+              <col className="w-[7%] min-w-[80px]" />
+              <col className="w-[12%] min-w-[140px]" />
             </colgroup>
             {/* Table Header */}
             <thead className="sticky top-0 z-20 bg-white border-b border-slate-200">
@@ -201,13 +199,11 @@ export default function TableView() {
                     <span>Name</span>
                   </div>
                 </th>
-                <th className="text-left px-3 py-3">Impact</th>
-                <th className="text-left px-3 py-3">Targeting</th>
                 <th className="text-left px-3 py-3">Status</th>
+                <th className="text-left px-3 py-3">Targeting</th>
                 <th className="text-left px-3 py-3">Quality</th>
                 <th className="text-left px-3 py-3">Usage</th>
                 <th className="text-left px-3 py-3">Last Edit</th>
-                <th className="text-left px-3 py-3"></th>
               </tr>
             </thead>
             

@@ -78,13 +78,6 @@ export default function ContentCard({ item, onClick, isDragging }) {
         {item.usageCount !== undefined && (
           <span>{item.usageCount} accounts</span>
         )}
-        
-        {parentCount > 1 && (
-          <span className="flex items-center gap-1 text-purple-600">
-            <Link2 className="w-3 h-3" />
-            Used in {parentCount}
-          </span>
-        )}
       </div>
     </div>
   )

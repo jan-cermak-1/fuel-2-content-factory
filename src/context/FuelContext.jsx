@@ -106,12 +106,16 @@ export function FuelProvider({ children }) {
     })
   }, [])
   
-  // Duplicate item
-  const duplicateItem = useCallback((id) => {
-    const original = items.find(item => item.id === id)
-    if (!original) return
+  // Recursive function to duplicate item and all its children
+  const duplicateItemRecursive = useCallback((itemId, itemsList, newParentId = null) => {
+    const original = itemsList.find(item => item.id === itemId)
+    if (!original) return { newId: null, newItems: [] }
     
-    const newId = `${original.type}-${Date.now()}`
+    const timestamp = Date.now()
+    const random = Math.floor(Math.random() * 1000)
+    const newId = `${original.type}-${timestamp}-${random}`
+    
+    // Duplicate the item
     const duplicate = {
       ...original,
       id: newId,
@@ -119,18 +123,40 @@ export function FuelProvider({ children }) {
       createdAt: new Date().toISOString(),
       lastEditedAt: new Date().toISOString(),
       status: 'draft',
-      childIds: [], // Don't duplicate children
+      childIds: [],
+      parentIds: newParentId ? [newParentId] : original.parentIds || [],
     }
     
+    const newItems = [duplicate]
+    
+    // Recursively duplicate all children
+    if (original.childIds && original.childIds.length > 0) {
+      original.childIds.forEach(childId => {
+        const childResult = duplicateItemRecursive(childId, itemsList, newId)
+        if (childResult.newId) {
+          duplicate.childIds.push(childResult.newId)
+          newItems.push(...childResult.newItems)
+        }
+      })
+    }
+    
+    return { newId, newItems }
+  }, [])
+  
+  // Duplicate item
+  const duplicateItem = useCallback((id) => {
+    const result = duplicateItemRecursive(id, items)
+    if (!result.newId) return
+    
     setItems(prev => {
-      // Add the duplicate
-      const newItems = [...prev, duplicate]
+      const newItems = [...prev, ...result.newItems]
       
       // If original has parents, add duplicate to same parents
-      if (original.parentIds?.length > 0) {
+      const original = items.find(item => item.id === id)
+      if (original?.parentIds?.length > 0) {
         return newItems.map(item => {
           if (original.parentIds.includes(item.id)) {
-            return { ...item, childIds: [...(item.childIds || []), newId] }
+            return { ...item, childIds: [...(item.childIds || []), result.newId] }
           }
           return item
         })
@@ -139,69 +165,51 @@ export function FuelProvider({ children }) {
       return newItems
     })
     
-    return newId
-  }, [items])
+    return result.newId
+  }, [items, duplicateItemRecursive])
   
   // Duplicate item to specific parent
   const duplicateItemTo = useCallback((id, targetParentId) => {
-    const original = items.find(item => item.id === id)
-    if (!original) return
-    
-    const newId = `${original.type}-${Date.now()}`
-    const duplicate = {
-      ...original,
-      id: newId,
-      name: `${original.name} (Copy)`,
-      createdAt: new Date().toISOString(),
-      lastEditedAt: new Date().toISOString(),
-      status: 'draft',
-      childIds: [], // Don't duplicate children
-      parentIds: [targetParentId],
-    }
+    const result = duplicateItemRecursive(id, items, targetParentId)
+    if (!result.newId) return
     
     setItems(prev => {
-      // Add the duplicate and update target parent
-      return [...prev, duplicate].map(item => {
+      const newItems = [...prev, ...result.newItems]
+      // Update target parent to include the duplicate
+      return newItems.map(item => {
         if (item.id === targetParentId) {
-          return { ...item, childIds: [...(item.childIds || []), newId] }
+          return { ...item, childIds: [...(item.childIds || []), result.newId] }
         }
         return item
       })
     })
     
-    return newId
-  }, [items])
+    return result.newId
+  }, [items, duplicateItemRecursive])
   
   // Duplicate item to multiple parents
   const duplicateItemToMultiple = useCallback((id, targetParentIds) => {
-    const original = items.find(item => item.id === id)
-    if (!original || !targetParentIds.length) return
+    if (!targetParentIds.length) return
     
-    const newItems = []
+    const allNewItems = []
     const parentUpdates = {}
+    const newIds = []
     
-    targetParentIds.forEach((parentId, index) => {
-      const newId = `${original.type}-${Date.now()}-${index}`
-      const duplicate = {
-        ...original,
-        id: newId,
-        name: `${original.name} (Copy)`,
-        createdAt: new Date().toISOString(),
-        lastEditedAt: new Date().toISOString(),
-        status: 'draft',
-        childIds: [],
-        parentIds: [parentId],
+    targetParentIds.forEach((parentId) => {
+      const result = duplicateItemRecursive(id, items, parentId)
+      if (result.newId) {
+        newIds.push(result.newId)
+        allNewItems.push(...result.newItems)
+        
+        if (!parentUpdates[parentId]) {
+          parentUpdates[parentId] = []
+        }
+        parentUpdates[parentId].push(result.newId)
       }
-      newItems.push(duplicate)
-      
-      if (!parentUpdates[parentId]) {
-        parentUpdates[parentId] = []
-      }
-      parentUpdates[parentId].push(newId)
     })
     
     setItems(prev => {
-      const updated = [...prev, ...newItems]
+      const updated = [...prev, ...allNewItems]
       return updated.map(item => {
         if (parentUpdates[item.id]) {
           return { 
@@ -213,8 +221,8 @@ export function FuelProvider({ children }) {
       })
     })
     
-    return newItems.map(i => i.id)
-  }, [items])
+    return newIds
+  }, [items, duplicateItemRecursive])
   
   // Reorder item within the same parent (no confirmation needed)
   const reorderChildInParent = useCallback((itemId, targetSiblingId, position = 'after') => {

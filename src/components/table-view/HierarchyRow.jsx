@@ -16,8 +16,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import StatusDropdown from './StatusDropdown'
 import QualityScore from './QualityScore'
 import TargetingPills from './TargetingPills'
-import ImpactBadge from './ImpactBadge'
-import UsedInBadge from './UsedInBadge'
 import InlineEditor from './InlineEditor'
 import QuickActions from './QuickActions'
 import { useFuel } from '../../context/FuelContext'
@@ -81,6 +79,7 @@ export default function HierarchyRow({
   const canDrag = item.type !== 'objective'
   
   return (
+    <>
     <tr 
       ref={rowRef}
       style={rowStyle}
@@ -95,14 +94,14 @@ export default function HierarchyRow({
         onSelect()
       }}
     >
-      {/* STICKY: Expand/Collapse + Drag Handle + Name */}
-      <td className={`sticky left-0 z-10 px-4 py-2.5 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors ${isDragging ? 'bg-teal-50' : isDropTarget ? 'bg-teal-50' : 'bg-white group-hover:bg-slate-50'}`}>
-        <div className="flex items-center gap-0">
-          {/* Drag Handle - visible for draggable items, shown first */}
+      {/* STICKY: Drag Handle + Expand + Badge + Name */}
+      <td className={`sticky left-0 z-10 px-2 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors overflow-visible ${isDragging ? 'bg-teal-50' : isDropTarget ? 'bg-teal-50' : 'bg-white group-hover:bg-slate-50'}`} style={{ minWidth: '400px', width: 'auto', position: 'relative' }}>
+        <div className="flex items-center h-12 relative overflow-visible w-full" style={{ minHeight: 48 }}>
+          {/* Drag Handle - FIRST */}
           {canDrag && dragHandleProps ? (
             <button
               {...dragHandleProps}
-              className="p-2 -m-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded cursor-grab active:cursor-grabbing transition-colors flex-shrink-0"
+              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded cursor-grab active:cursor-grabbing transition-colors flex-shrink-0 z-20"
               onClick={(e) => e.stopPropagation()}
             >
               <GripVertical className="w-4 h-4" />
@@ -111,14 +110,14 @@ export default function HierarchyRow({
             <div className="w-7 flex-shrink-0" />
           )}
           
-          {/* Expand/collapse button */}
+          {/* Expand/collapse button - SECOND (right after drag handle) */}
           {hasChildren ? (
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 onToggle()
               }}
-              className="p-2 -m-1 hover:bg-slate-200 rounded transition-colors flex-shrink-0"
+              className="p-1.5 hover:bg-slate-200 rounded transition-colors flex-shrink-0 z-20"
             >
               <motion.div
                 animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -131,80 +130,73 @@ export default function HierarchyRow({
             <div className="w-7 flex-shrink-0" />
           )}
           
-          {/* Name with type badge - tree structure with connecting lines */}
-          <div className="flex items-center gap-2 min-w-0 relative ml-1">
-            {/* Tree connector lines - extends beyond row boundaries for seamless connections */}
-            {typeInfo.indent > 0 && (
-              <div 
-                className="flex-shrink-0 relative" 
-                style={{ width: typeInfo.indent * 20, height: 60, marginTop: -10, marginBottom: -10 }}
-              >
-                {/* Render vertical lines for each depth level */}
-                {Array.from({ length: typeInfo.indent }).map((_, levelIndex) => {
-                  // For continuation lines at previous levels (items above have more siblings)
-                  const showContinuationLine = levelIndex < typeInfo.indent - 1 && connectorLevels[levelIndex]
-                  // For the current level (where we draw the corner/T connector)
-                  const isCurrentLevel = levelIndex === typeInfo.indent - 1
-                  const lineX = levelIndex * 20 + 9
-                  
-                  return (
-                    <div key={levelIndex}>
-                      {/* Continuation vertical line - full height through row for siblings at this level */}
-                      {showContinuationLine && (
-                        <div 
-                          className="absolute bg-slate-300"
-                          style={{ 
-                            left: lineX, 
-                            width: 1, 
-                            top: 0,
-                            height: 60
-                          }}
-                        />
-                      )}
-                      
-                      {/* Current level connector */}
-                      {isCurrentLevel && (
-                        <>
-                          {/* Vertical line - full height if more siblings, half if last */}
-                          <div 
-                            className="absolute bg-slate-300"
-                            style={{ 
-                              left: lineX, 
-                              width: 1,
-                              top: 0,
-                              height: isLastSibling ? 30 : 60
-                            }}
-                          />
-                          {/* Horizontal connector to badge */}
-                          <div 
-                            className="absolute bg-slate-300"
-                            style={{ 
-                              left: lineX, 
-                              top: 30, 
-                              width: 10, 
-                              height: 1
-                            }}
-                          />
-                        </>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+          {/* Tree connector lines - positioned absolutely to connect to badge */}
+          {depth > 0 && Array.from({ length: depth }).map((_, levelIndex) => {
+            const showContinuationLine = levelIndex < depth - 1 && connectorLevels[levelIndex]
+            const isCurrentLevel = levelIndex === depth - 1
+            // Base position: drag handle (28px) + expand button (28px) = 56px
+            // Then add levelIndex * 24 for each level of indentation
+            const verticalLineX = 56 + (levelIndex * 24) + 12
             
-            {/* Downward line from expanded parent to children */}
-            {isExpanded && hasChildren && (
-              <div 
-                className="absolute bg-slate-300"
-                style={{ 
-                  left: typeInfo.indent * 20 + 9 + (typeInfo.indent > 0 ? 0 : 0),
-                  width: 1,
-                  top: 30,
-                  height: 30
-                }}
-              />
-            )}
+            return (
+              <div key={levelIndex}>
+                {/* Continuation vertical line - full height through cell */}
+                {showContinuationLine && (
+                  <div 
+                    className="absolute bg-slate-300 z-10 pointer-events-none"
+                    style={{ left: verticalLineX, width: 1, top: 0, bottom: 0 }}
+                  />
+                )}
+                
+                {/* Current level L/T connector */}
+                {isCurrentLevel && (
+                  <>
+                    {/* Vertical line - from top, stops at middle if last sibling, full height if more siblings */}
+                    <div 
+                      className="absolute bg-slate-300 z-10 pointer-events-none"
+                      style={{ 
+                        left: verticalLineX, 
+                        width: 1, 
+                        top: 0, 
+                        height: isLastSibling ? 24 : '100%'
+                      }}
+                    />
+                    {/* Horizontal arm to badge - calculate distance to badge position */}
+                    <div 
+                      className="absolute bg-slate-300 z-10 pointer-events-none"
+                      style={{ 
+                        left: verticalLineX, 
+                        top: 23, 
+                        width: 56 + (depth * 24) + 8 - verticalLineX,
+                        height: 1 
+                      }}
+                    />
+                  </>
+                )}
+              </div>
+            )
+          })}
+          
+          {/* Downward line from expanded parent to first child */}
+          {isExpanded && hasChildren && (
+            <div 
+              className="absolute bg-slate-300 z-10 pointer-events-none" 
+              style={{ 
+                left: 56 + (depth * 24) + 12,
+                top: 24, 
+                bottom: 0,
+                width: 1
+              }}
+            />
+          )}
+          
+          {/* Indentation spacer to push badge to the right */}
+          {depth > 0 && (
+            <div style={{ width: depth * 24 }} className="flex-shrink-0" />
+          )}
+          
+          {/* Name with type badge */}
+          <div className="flex items-center gap-2 min-w-0 ml-2 flex-1">
             
             <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${typeInfo.color} flex-shrink-0`}>
               {typeInfo.label}
@@ -225,7 +217,7 @@ export default function HierarchyRow({
               />
             ) : (
               <span 
-                className="text-sm font-medium text-slate-900 truncate cursor-text hover:bg-slate-100 px-1 rounded max-w-[140px]"
+                className="text-sm font-medium text-slate-900 truncate cursor-text hover:bg-slate-100 px-1 rounded flex-1 min-w-0"
                 onDoubleClick={(e) => {
                   e.stopPropagation()
                   setIsEditing(true)
@@ -236,30 +228,39 @@ export default function HierarchyRow({
               </span>
             )}
             
-            {/* Many-to-many indicator */}
-            {parentCount > 1 && (
-              <UsedInBadge count={parentCount} type={item.type} />
-            )}
+            {/* Quick Actions - visible on hover, moved to NAME column */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ml-auto flex-shrink-0">
+              <QuickActions 
+                item={item} 
+                onAiClick={() => {
+                  setAiPanelOpen(true)
+                }}
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setMenuOpen(!menuOpen)
+                }}
+                className="p-1 hover:bg-slate-200 rounded transition-all"
+              >
+                <MoreHorizontal className="w-4 h-4 text-slate-400" />
+              </button>
+            </div>
           </div>
         </div>
       </td>
       
-      {/* Impact */}
-      <td className="px-3 py-2.5">
-        <ImpactBadge usageCount={item.usageCount} qualityScore={item.qualityScore} />
-      </td>
-      
-      {/* Targeting */}
-      <td className="px-3 py-2.5 overflow-hidden">
-        <TargetingPills targeting={item.targeting} maxPills={2} />
-      </td>
-      
-      {/* Status */}
+      {/* Status - moved right after NAME */}
       <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
         <StatusDropdown 
           status={item.status} 
           onChange={(newStatus) => updateItem(item.id, { status: newStatus })}
         />
+      </td>
+      
+      {/* Targeting */}
+      <td className="px-3 py-2.5 overflow-hidden">
+        <TargetingPills targeting={item.targeting} maxPills={2} />
       </td>
       
       {/* Quality Score */}
@@ -284,49 +285,34 @@ export default function HierarchyRow({
           <span title={`${item.lastEditedBy}, ${lastEdited}`}>{item.lastEditedBy}, {lastEdited}</span>
         )}
       </td>
-      
-      {/* Quick Actions + Menu */}
-      <td className="px-3 py-2.5">
-        <div className="relative flex items-center gap-1">
-          {/* Quick Actions - visible on hover */}
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <QuickActions 
-              item={item} 
-              onAiClick={() => {
-                setAiPanelOpen(true)
-              }}
-            />
-          </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              setMenuOpen(!menuOpen)
+    </tr>
+    
+    {/* Context Menu - rendered outside table row */}
+    <AnimatePresence>
+      {menuOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-10" 
+            onClick={() => setMenuOpen(false)} 
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed z-20 w-52 bg-white rounded-lg shadow-lg border border-slate-200 py-1"
+            style={{
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)'
             }}
-            className="p-1 opacity-0 group-hover:opacity-100 hover:bg-slate-200 rounded transition-all"
           >
-            <MoreHorizontal className="w-4 h-4 text-slate-400" />
-          </button>
-          
-          <AnimatePresence>
-            {menuOpen && (
-              <>
-                <div 
-                  className="fixed inset-0 z-10" 
-                  onClick={() => setMenuOpen(false)} 
-                />
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="absolute right-0 top-8 w-52 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-20"
-                >
-                  <button
-                    onClick={() => {
-                      setAiPanelOpen(true)
-                      setMenuOpen(false)
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                  >
+              <button
+                onClick={() => {
+                  setAiPanelOpen(true)
+                  setMenuOpen(false)
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              >
                     <Sparkles className="w-4 h-4 text-teal-500" />
                     Generate with AI
                   </button>
@@ -383,12 +369,10 @@ export default function HierarchyRow({
                     <Trash2 className="w-4 h-4" />
                     Delete
                   </button>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
-        </div>
-      </td>
-    </tr>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+    </>
   )
 }

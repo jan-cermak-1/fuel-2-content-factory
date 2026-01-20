@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Check, 
   Loader2, 
@@ -12,10 +12,15 @@ import {
   Sparkles,
   CheckCircle2,
   AlertCircle,
-  Edit3
+  Edit3,
+  ShieldCheck,
+  AlertTriangle,
+  Wand2,
+  RefreshCw
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFuel } from '../../../context/FuelContext'
+import { emplifiProducts } from '../../../data/products'
 
 const typeConfig = {
   objective: { 
@@ -60,6 +65,77 @@ const typeConfig = {
   },
 }
 
+// Mock AI quality check function
+const runAIQualityCheck = async (items, data) => {
+  await new Promise(resolve => setTimeout(resolve, 1200))
+  
+  const issues = []
+  const suggestions = []
+  
+  items.forEach(item => {
+    // Check name length
+    if (item.name && item.name.length < 10) {
+      issues.push({
+        itemId: item.id,
+        type: 'warning',
+        field: 'name',
+        message: `"${item.name}" is too short. Consider a more descriptive name.`,
+        suggestion: `${item.name} - Best Practice Guide`
+      })
+    }
+    
+    // Check description
+    if (!item.description || item.description.length < 20) {
+      issues.push({
+        itemId: item.id,
+        type: 'warning',
+        field: 'description',
+        message: 'Description is missing or too short.',
+        suggestion: 'Add a detailed description explaining the purpose and expected outcomes.'
+      })
+    }
+    
+    // Check for clarity
+    if (item.description && item.description.includes('etc.')) {
+      issues.push({
+        itemId: item.id,
+        type: 'info',
+        field: 'description',
+        message: 'Avoid vague terms like "etc." - be specific.',
+      })
+    }
+  })
+  
+  // Check scope/targeting
+  if (!data.scope?.type || data.scope?.type === 'universal') {
+    suggestions.push({
+      type: 'suggestion',
+      message: 'Consider specifying target industries or regions for better relevance.',
+      action: 'addTargeting'
+    })
+  }
+  
+  // Check products
+  if (!data.requiredProducts?.length) {
+    suggestions.push({
+      type: 'suggestion', 
+      message: 'No Emplifi products specified. Add products to help users understand requirements.',
+      action: 'addProducts'
+    })
+  }
+  
+  // Overall score
+  const issueCount = issues.filter(i => i.type === 'warning').length
+  const score = Math.max(60, 100 - (issueCount * 10) - (suggestions.length * 5))
+  
+  return {
+    score,
+    issues,
+    suggestions,
+    passed: score >= 70
+  }
+}
+
 export default function ReviewStep({ data, updateData, onClose }) {
   const { addItem, updateItem, items } = useFuel()
   const [isCreating, setIsCreating] = useState(false)
@@ -67,6 +143,11 @@ export default function ReviewStep({ data, updateData, onClose }) {
   const [expandedItems, setExpandedItems] = useState(new Set(['main']))
   const [editingItem, setEditingItem] = useState(null)
   const [editForm, setEditForm] = useState({ name: '', description: '' })
+  
+  // AI Quality Check state
+  const [qualityCheck, setQualityCheck] = useState(null)
+  const [isCheckingQuality, setIsCheckingQuality] = useState(false)
+  const [showQualityDetails, setShowQualityDetails] = useState(false)
   
   const config = typeConfig[data.type]
   const Icon = config?.icon || Layers
@@ -93,6 +174,44 @@ export default function ReviewStep({ data, updateData, onClose }) {
   }))
   
   const allItems = [mainItem, ...variantItems]
+  
+  // Run AI quality check on mount
+  useEffect(() => {
+    const runCheck = async () => {
+      setIsCheckingQuality(true)
+      const result = await runAIQualityCheck(allItems, data)
+      setQualityCheck(result)
+      setIsCheckingQuality(false)
+    }
+    runCheck()
+  }, []) // Run once on mount
+  
+  // Re-run quality check
+  const rerunQualityCheck = async () => {
+    setIsCheckingQuality(true)
+    const result = await runAIQualityCheck(allItems, data)
+    setQualityCheck(result)
+    setIsCheckingQuality(false)
+  }
+  
+  // Apply AI suggestion
+  const applySuggestion = (issue) => {
+    if (issue.suggestion && issue.itemId) {
+      setEditedItems(prev => ({
+        ...prev,
+        [issue.itemId]: {
+          ...prev[issue.itemId],
+          [issue.field]: issue.suggestion
+        }
+      }))
+      // Remove the issue from the list
+      setQualityCheck(prev => ({
+        ...prev,
+        issues: prev.issues.filter(i => i !== issue),
+        score: Math.min(100, prev.score + 10)
+      }))
+    }
+  }
   
   // Start editing an item
   const startEditing = (item) => {
@@ -159,13 +278,21 @@ export default function ReviewStep({ data, updateData, onClose }) {
         name: item.name,
         description: item.description,
         status: data.status || 'draft',
-        qualityScore: Math.floor(Math.random() * 15) + 80,
+        qualityScore: qualityCheck?.score || Math.floor(Math.random() * 15) + 80,
         usageCount: 0,
-        targeting: item.targeting || {
+        scope: data.scope || {
+          type: 'universal',
           industries: [],
+          accounts: [],
           regions: [],
           jobRoles: [],
-          accounts: ['all'],
+        },
+        requiredProducts: data.requiredProducts || [],
+        targeting: item.targeting || {
+          industries: data.scope?.industries || [],
+          regions: data.scope?.regions || [],
+          jobRoles: data.scope?.jobRoles || [],
+          accounts: data.scope?.accounts || ['all'],
         },
         parentIds: data.parentId ? [data.parentId] : [],
         childIds: [],
@@ -493,6 +620,156 @@ export default function ReviewStep({ data, updateData, onClose }) {
           <p className="text-sm text-slate-600">{config?.childLabel || 'Children'}</p>
         </div>
       </div>
+      
+      {/* AI Quality Check */}
+      <div className={`mb-6 rounded-xl border overflow-hidden transition-all ${
+        isCheckingQuality 
+          ? 'border-slate-200 bg-slate-50'
+          : qualityCheck?.passed 
+            ? 'border-emerald-200 bg-emerald-50' 
+            : 'border-amber-200 bg-amber-50'
+      }`}>
+        <div className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {isCheckingQuality ? (
+                <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 text-slate-500 animate-spin" />
+                </div>
+              ) : qualityCheck?.passed ? (
+                <div className="w-10 h-10 rounded-lg bg-emerald-200 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-emerald-700" />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-lg bg-amber-200 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-amber-700" />
+                </div>
+              )}
+              
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-semibold text-slate-900">AI Quality Check</h4>
+                  {!isCheckingQuality && qualityCheck && (
+                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                      qualityCheck.passed 
+                        ? 'bg-emerald-200 text-emerald-800'
+                        : 'bg-amber-200 text-amber-800'
+                    }`}>
+                      Score: {qualityCheck.score}/100
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-slate-600">
+                  {isCheckingQuality 
+                    ? 'Analyzing content quality...'
+                    : qualityCheck?.passed
+                      ? 'Content passed quality check!'
+                      : `${qualityCheck?.issues?.length || 0} issues found`
+                  }
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {!isCheckingQuality && qualityCheck && (
+                <>
+                  <button
+                    onClick={rerunQualityCheck}
+                    className="p-2 hover:bg-white/50 rounded-lg transition-colors"
+                    title="Re-run check"
+                  >
+                    <RefreshCw className="w-4 h-4 text-slate-500" />
+                  </button>
+                  {(qualityCheck.issues?.length > 0 || qualityCheck.suggestions?.length > 0) && (
+                    <button
+                      onClick={() => setShowQualityDetails(!showQualityDetails)}
+                      className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-white/50 rounded-lg transition-colors"
+                    >
+                      {showQualityDetails ? 'Hide' : 'Details'}
+                      {showQualityDetails ? (
+                        <ChevronDown className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        <AnimatePresence>
+          {showQualityDetails && qualityCheck && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 pb-4 space-y-3 border-t border-slate-200/50 pt-3">
+                {/* Issues */}
+                {qualityCheck.issues?.map((issue, idx) => (
+                  <div 
+                    key={idx}
+                    className="flex items-start gap-3 p-3 bg-white rounded-lg"
+                  >
+                    {issue.type === 'warning' ? (
+                      <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-slate-700">{issue.message}</p>
+                      {issue.suggestion && (
+                        <button
+                          onClick={() => applySuggestion(issue)}
+                          className="mt-2 flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-teal-700 bg-teal-100 hover:bg-teal-200 rounded-lg transition-colors"
+                        >
+                          <Wand2 className="w-3.5 h-3.5" />
+                          Apply fix
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Suggestions */}
+                {qualityCheck.suggestions?.map((sug, idx) => (
+                  <div 
+                    key={`sug-${idx}`}
+                    className="flex items-start gap-3 p-3 bg-white rounded-lg"
+                  >
+                    <Sparkles className="w-4 h-4 text-violet-500 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-slate-700">{sug.message}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      
+      {/* Required Products Summary */}
+      {data.requiredProducts?.length > 0 && (
+        <div className="mb-6 p-4 bg-slate-50 rounded-xl">
+          <h4 className="text-sm font-medium text-slate-700 mb-2">Required Emplifi Products</h4>
+          <div className="flex flex-wrap gap-2">
+            {data.requiredProducts.map(productId => {
+              const product = emplifiProducts.find(p => p.id === productId)
+              if (!product) return null
+              return (
+                <span 
+                  key={productId}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-lg bg-${product.color}-100 text-${product.color}-700`}
+                >
+                  {product.name}
+                </span>
+              )
+            })}
+          </div>
+        </div>
+      )}
       
       {/* Items to create */}
       <div className="space-y-3 mb-6">
