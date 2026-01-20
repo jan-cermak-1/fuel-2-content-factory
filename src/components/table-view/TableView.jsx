@@ -193,7 +193,7 @@ export default function TableView() {
             {/* Table Header */}
             <thead className="sticky top-0 z-20 bg-white border-b border-slate-200">
               <tr className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                <th className="sticky left-0 z-30 bg-white text-left px-4 py-3 shadow-[4px_0_15px_-3px_rgba(0,0,0,0.25)]">
+                <th className="sticky left-0 z-30 bg-white text-left px-4 py-3 border-r border-slate-200 shadow-[6px_0_20px_-5px_rgba(0,0,0,0.3)]">
                   <div className="flex items-center gap-2">
                     <span className="w-14"></span>
                     <span>Name</span>
