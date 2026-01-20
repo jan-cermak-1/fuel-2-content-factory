@@ -27,9 +27,10 @@ export default function DraggableRow({ item, ...props }) {
     id: `reorder-after-${item.id}`,
   })
   
-  const style = transform ? {
-    transform: CSS.Translate.toString(transform),
-  } : undefined
+  const style = {
+    ...(transform ? { transform: CSS.Translate.toString(transform) } : {}),
+    opacity: isDragging ? 0 : 1,
+  }
   
   // Only show drop zones when something is being dragged (but not this item itself)
   const showDropZones = isSomethingDragging && !isDragging

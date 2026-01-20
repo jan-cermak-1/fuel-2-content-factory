@@ -36,9 +36,10 @@ export default function DraggableDroppableRow({ item, ...props }) {
   
   const isOver = isOverForChildren
   
-  const style = transform ? {
-    transform: CSS.Translate.toString(transform),
-  } : undefined
+  const style = {
+    ...(transform ? { transform: CSS.Translate.toString(transform) } : {}),
+    opacity: isDragging ? 0 : 1,
+  }
   
   // Combine refs for main element
   const setNodeRef = (node) => {
