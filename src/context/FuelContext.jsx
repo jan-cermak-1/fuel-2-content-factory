@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { seedData, getItemById, getChildrenOf, getParentsOf } from '../data/seedData'
 import { accountProfiles } from '../data/accountProfiles'
 import { successStories } from '../data/successStories'
@@ -6,10 +6,35 @@ import { mockUsageData } from '../data/mockUsageData'
 
 const FuelContext = createContext(null)
 
+// LocalStorage key for expanded items
+const EXPANDED_IDS_KEY = 'fuel-expanded-ids'
+
+// Load expanded IDs from localStorage
+const loadExpandedIds = () => {
+  try {
+    const saved = localStorage.getItem(EXPANDED_IDS_KEY)
+    if (saved) {
+      return new Set(JSON.parse(saved))
+    }
+  } catch (error) {
+    console.error('Failed to load expanded IDs from localStorage:', error)
+  }
+  return new Set() // Default: everything collapsed
+}
+
+// Save expanded IDs to localStorage
+const saveExpandedIds = (expandedIds) => {
+  try {
+    localStorage.setItem(EXPANDED_IDS_KEY, JSON.stringify([...expandedIds]))
+  } catch (error) {
+    console.error('Failed to save expanded IDs to localStorage:', error)
+  }
+}
+
 export function FuelProvider({ children }) {
   // Content state
   const [items, setItems] = useState(seedData)
-  const [expandedIds, setExpandedIds] = useState(new Set(['obj-1', 'obj-2']))
+  const [expandedIds, setExpandedIds] = useState(loadExpandedIds)
   const [selectedId, setSelectedId] = useState(null)
   
   // View state
@@ -55,6 +80,8 @@ export function FuelProvider({ children }) {
       } else {
         next.add(id)
       }
+      // Save to localStorage
+      saveExpandedIds(next)
       return next
     })
   }, [])
