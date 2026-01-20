@@ -95,7 +95,7 @@ export default function HierarchyRow({
       }}
     >
       {/* STICKY: Drag Handle + Expand + Badge + Name */}
-      <td className={`sticky left-0 z-10 px-2 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors overflow-visible ${isDragging ? 'bg-teal-50' : isDropTarget ? 'bg-teal-50' : 'bg-white group-hover:bg-slate-50'}`} style={{ minWidth: '400px', width: 'auto', position: 'relative' }}>
+      <td className={`sticky left-0 z-10 px-2 shadow-[4px_0_15px_-3px_rgba(0,0,0,0.25)] transition-colors ${isDragging ? 'bg-teal-50' : isDropTarget ? 'bg-teal-50' : 'bg-white group-hover:bg-slate-50'}`} style={{ minWidth: '400px', width: 'auto' }}>
         <div className="flex items-center h-12 relative overflow-visible w-full" style={{ minHeight: 48 }}>
           {/* Drag Handle - FIRST */}
           {canDrag && dragHandleProps ? (

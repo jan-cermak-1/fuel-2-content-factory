@@ -176,12 +176,12 @@ export default function TableView() {
       <div className="h-full flex flex-col">
         {/* Drag hint */}
         <div className="mb-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">
-          💡 Tip: Drag items to move them between parents. Right-click for more options.
+          💡 Tip: Drag items to move them between parents.
         </div>
         
         {/* Scrollable Table Container */}
         <div className="flex-1 overflow-auto bg-white rounded-lg border border-slate-200">
-          <table className="w-full border-collapse min-w-[1000px]">
+          <table className="w-full min-w-[1000px]" style={{ borderSpacing: 0 }}>
             <colgroup>
               <col style={{ minWidth: '400px' }} />
               <col className="w-[110px] min-w-[110px]" />
@@ -193,7 +193,7 @@ export default function TableView() {
             {/* Table Header */}
             <thead className="sticky top-0 z-20 bg-white border-b border-slate-200">
               <tr className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                <th className="sticky left-0 z-30 bg-white text-left px-4 py-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                <th className="sticky left-0 z-30 bg-white text-left px-4 py-3 shadow-[4px_0_15px_-3px_rgba(0,0,0,0.25)]">
                   <div className="flex items-center gap-2">
                     <span className="w-14"></span>
                     <span>Name</span>
